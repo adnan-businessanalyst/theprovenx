@@ -9,6 +9,168 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Register with email and password
+ */
+export const registerBodyEmailMin = 3;
+export const registerBodyEmailMax = 320;
+
+export const registerBodyPasswordMin = 8;
+export const registerBodyPasswordMax = 128;
+
+export const registerBodyUsernameMin = 3;
+export const registerBodyUsernameMax = 30;
+
+export const registerBodyDisplayNameMax = 80;
+
+
+
+export const RegisterBody = zod.object({
+  "email": zod.string().min(registerBodyEmailMin).max(registerBodyEmailMax),
+  "password": zod.string().min(registerBodyPasswordMin).max(registerBodyPasswordMax),
+  "username": zod.string().min(registerBodyUsernameMin).max(registerBodyUsernameMax),
+  "displayName": zod.string().min(1).max(registerBodyDisplayNameMax)
+})
+
+export const RegisterResponse = zod.object({
+  "user": zod.object({
+  "id": zod.number(),
+  "username": zod.string(),
+  "displayName": zod.string(),
+  "avatarUrl": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "reputation": zod.number(),
+  "role": zod.enum(['member', 'moderator', 'admin', 'platform_owner']),
+  "plan": zod.enum(['free', 'pro']),
+  "isSuspended": zod.boolean(),
+  "questionCount": zod.number(),
+  "answerCount": zod.number(),
+  "acceptedAnswerCount": zod.number(),
+  "createdAt": zod.string()
+}),
+  "token": zod.string().describe('Opaque session token for Bearer auth (mobile). Also set as httpOnly cookie for web.')
+})
+
+
+/**
+ * @summary Sign in with email and password
+ */
+export const loginBodyEmailMin = 3;
+export const loginBodyEmailMax = 320;
+
+export const loginBodyPasswordMax = 128;
+
+
+
+export const LoginBody = zod.object({
+  "email": zod.string().min(loginBodyEmailMin).max(loginBodyEmailMax),
+  "password": zod.string().min(1).max(loginBodyPasswordMax)
+})
+
+export const LoginResponse = zod.object({
+  "user": zod.object({
+  "id": zod.number(),
+  "username": zod.string(),
+  "displayName": zod.string(),
+  "avatarUrl": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "reputation": zod.number(),
+  "role": zod.enum(['member', 'moderator', 'admin', 'platform_owner']),
+  "plan": zod.enum(['free', 'pro']),
+  "isSuspended": zod.boolean(),
+  "questionCount": zod.number(),
+  "answerCount": zod.number(),
+  "acceptedAnswerCount": zod.number(),
+  "createdAt": zod.string()
+}),
+  "token": zod.string().describe('Opaque session token for Bearer auth (mobile). Also set as httpOnly cookie for web.')
+})
+
+
+/**
+ * @summary Sign out (revoke session cookie / bearer token)
+ */
+export const LogoutResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Current authenticated user (session cookie or Bearer)
+ */
+export const GetAuthMeResponse = zod.object({
+  "id": zod.number(),
+  "username": zod.string(),
+  "displayName": zod.string(),
+  "avatarUrl": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "reputation": zod.number(),
+  "role": zod.enum(['member', 'moderator', 'admin', 'platform_owner']),
+  "plan": zod.enum(['free', 'pro']),
+  "isSuspended": zod.boolean(),
+  "questionCount": zod.number(),
+  "answerCount": zod.number(),
+  "acceptedAnswerCount": zod.number(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Change password for the signed-in user
+ */
+export const changePasswordBodyCurrentPasswordMax = 128;
+
+export const changePasswordBodyNewPasswordMin = 8;
+export const changePasswordBodyNewPasswordMax = 128;
+
+
+
+export const ChangePasswordBody = zod.object({
+  "currentPassword": zod.string().min(1).max(changePasswordBodyCurrentPasswordMax),
+  "newPassword": zod.string().min(changePasswordBodyNewPasswordMin).max(changePasswordBodyNewPasswordMax)
+})
+
+export const ChangePasswordResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Request a password reset email (always returns generic success)
+ */
+export const forgotPasswordBodyEmailMin = 3;
+export const forgotPasswordBodyEmailMax = 320;
+
+
+
+export const ForgotPasswordBody = zod.object({
+  "email": zod.string().min(forgotPasswordBodyEmailMin).max(forgotPasswordBodyEmailMax)
+})
+
+export const ForgotPasswordResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Reset password using a one-time token
+ */
+
+export const resetPasswordBodyPasswordMin = 8;
+export const resetPasswordBodyPasswordMax = 128;
+
+
+
+export const ResetPasswordBody = zod.object({
+  "token": zod.string().min(1),
+  "password": zod.string().min(resetPasswordBodyPasswordMin).max(resetPasswordBodyPasswordMax)
+})
+
+export const ResetPasswordResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({

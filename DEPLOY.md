@@ -10,6 +10,8 @@
 
 Vercel hosts the frontend. The app proxies `/api/*` to your Express `API_URL`.
 
+Auth is **first-party** (Express sessions). Web uses the httpOnly `tp_session` cookie through the Next rewrite. Mobile uses Bearer tokens from the same `sessions` table.
+
 ---
 
 ## 1. Database
@@ -22,6 +24,9 @@ Push schema from your machine (or CI):
 pnpm --filter @workspace/db run push
 ```
 
+### Clerk cutover
+If you previously used Clerk, `users.clerk_id` is gone. Rows that only had a Clerk identity cannot log in until they re-register (or you seed accounts with `create-platform-owner.ts` / password reset). For production cutover, plan a maintenance window, push the new schema, and communicate re-registration to members.
+
 ---
 
 ## 2. Express API (not on Vercel)
@@ -32,9 +37,10 @@ Required env on the API host:
 
 - `PORT` (often set by the platform)
 - `DATABASE_URL`
-- `CLERK_PUBLISHABLE_KEY`
-- `CLERK_SECRET_KEY`
+- `SESSION_SECRET` (long random string)
 - `NODE_ENV=production`
+- `PUBLIC_APP_URL` (e.g. `https://your-app.vercel.app` — used in reset emails)
+- Optional: `COOKIE_DOMAIN` if web and API share a parent domain and you set cookies across subdomains
 
 Start command example:
 
@@ -45,19 +51,11 @@ pnpm --filter @workspace/api-server run start
 
 Note the public API origin, e.g. `https://api.yourdomain.com`.
 
----
-
-## 3. Clerk
-
-In the [Clerk dashboard](https://dashboard.clerk.com):
-
-1. Add your Vercel URL to allowed origins / redirect URLs  
-   (`https://your-app.vercel.app`, `/sign-in`, `/sign-up`)
-2. Copy **Publishable key** and **Secret key**
+**Cookie note:** With Next rewriting `/api/*` to Express, browsers treat Set-Cookie as coming from the Vercel origin. Prefer same-site deploy (rewrite) over cross-origin API calls from the browser. If the browser talks to the API origin directly, configure CORS + `COOKIE_DOMAIN` carefully (`SameSite=None; Secure` in production).
 
 ---
 
-## 4. Deploy Next.js on Vercel
+## 3. Deploy Next.js on Vercel
 
 ### A. GitHub import (recommended)
 
@@ -74,8 +72,6 @@ In the [Clerk dashboard](https://dashboard.clerk.com):
 | Name | Example |
 |---|---|
 | `NEXT_PUBLIC_SITE_URL` | `https://your-app.vercel.app` |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `pk_live_...` or `pk_test_...` |
-| `CLERK_SECRET_KEY` | `sk_live_...` or `sk_test_...` |
 | `API_URL` | `https://your-api-host.example` |
 
 5. Deploy
@@ -95,15 +91,9 @@ Link the project, set Root Directory to `artifacts/community` when prompted, the
 
 ---
 
-## 5. Smoke test
+## 4. Smoke test
 
 - Open the Vercel URL — home page loads
-- `/robots.txt`, `/sitemap.xml` respond
-- Sign-in works (Clerk)
-- Questions load (API + DB reachable via `API_URL`)
-
----
-
-## Local env template
-
-See `artifacts/community/.env.example`.
+- Register a new user at `/sign-up` (first user becomes admin)
+- Confirm `/api/healthz` via the rewrite
+- Sign out / sign in works; protected routes (`/ask`, `/profile`, `/admin`) require the session cookie

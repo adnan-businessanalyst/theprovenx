@@ -7,7 +7,7 @@ import { isLiquidGlassAvailable } from 'expo-glass-effect';
 import { Tabs } from 'expo-router';
 import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs';
 import { SymbolView } from 'expo-symbols';
-import { useAuth } from '@clerk/expo';
+import { useAuth } from '@/lib/auth';
 import { useListNotifications } from '@workspace/api-client-react';
 
 function useUnreadCount(): number {

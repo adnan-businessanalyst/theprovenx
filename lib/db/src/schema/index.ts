@@ -1,4 +1,7 @@
 export * from "./users";
+export * from "./sessions";
+export * from "./passwordResetTokens";
+export * from "./oauthAccounts";
 export * from "./questions";
 export * from "./answers";
 export * from "./comments";

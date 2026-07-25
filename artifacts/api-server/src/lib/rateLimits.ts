@@ -1,8 +1,9 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import type { Request } from "express";
 
 function keyFor(req: Request): string {
-  return req.localUser ? `u:${req.localUser.id}` : `ip:${req.ip}`;
+  if (req.localUser) return `u:${req.localUser.id}`;
+  return `ip:${ipKeyGenerator(req.ip ?? "unknown")}`;
 }
 
 const common = {
@@ -10,6 +11,7 @@ const common = {
   legacyHeaders: false,
   keyGenerator: keyFor,
   message: { message: "Too many requests, please slow down." },
+  validate: { ip: false },
 };
 
 export const writeLimiter = rateLimit({
@@ -44,4 +46,20 @@ export const translateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: 60,
   ...common,
+});
+
+/** Login / register — per IP */
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+  ...common,
+  keyGenerator: (req) => `auth:${ipKeyGenerator(req.ip ?? "unknown")}`,
+});
+
+/** Password change / forgot / reset — tighter */
+export const authStrictLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 10,
+  ...common,
+  keyGenerator: (req) => `auth-strict:${ipKeyGenerator(req.ip ?? "unknown")}`,
 });

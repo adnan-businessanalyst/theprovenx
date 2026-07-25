@@ -17,13 +17,13 @@ Brand palette (owner-specified): orange primary, blue secondary (nav/icons), yel
 - SEO: per-route Next.js metadata, JSON-LD (WebSite/Organization, QAPage, Person), `app/robots.ts`, `app/sitemap.ts`, `app/manifest.ts`
 
 ## Architecture
-- pnpm monorepo. Frontend: `artifacts/community` (Next.js App Router, TanStack Query, Tailwind v4, react-i18next, `@clerk/nextjs`). Backend: `artifacts/api-server` (Express 5, pino). Design preview: `artifacts/mockup-sandbox` (Next.js).
+- pnpm monorepo. Frontend: `artifacts/community` (Next.js App Router, TanStack Query, Tailwind v4, react-i18next). Backend: `artifacts/api-server` (Express 5, pino). Design preview: `artifacts/mockup-sandbox` (Next.js).
 - Next.js rewrites `/api/*` to the Express API (`API_URL`, default `http://localhost:8080`).
 - API contract: `lib/api-spec/openapi.yaml` → Orval codegen (`pnpm --filter @workspace/api-spec run codegen`) → hooks in `lib/api-client-react`, Zod in `lib/api-zod`.
 - DB: Postgres via Drizzle (`lib/db/src/schema/`). Push with `pnpm --filter @workspace/db run push`.
-- Auth: Clerk (`@clerk/nextjs` on web; `@clerk/express` + optional proxy on api-server). Local `users` table is JIT-provisioned from Clerk identity; **the first user to sign in becomes admin**.
+- Auth: first-party sessions on Express (`/api/auth/*`). Web uses httpOnly `tp_session` cookie; mobile uses Bearer token from SecureStore. **First registered user becomes admin**.
 - Translation: Replit AI integration (OpenAI proxy) via `lib/integrations-openai-ai-server`; results cached in `translations` table.
-- Email: pluggable scaffold in `artifacts/api-server/src/lib/mailer.ts` (dev log transport; no mail server wired). Account emails are handled by Clerk.
+- Email: pluggable scaffold in `artifacts/api-server/src/lib/mailer.ts` (dev log transport; password-reset emails use the same stub).
 - Payments: scaffolding only — `transactions` table + admin listing; no live gateway.
 - SSE notifications: `GET /api/notifications/stream` (not in OpenAPI spec by design).
 - Sitemap: Next.js `app/sitemap.ts` (primary for the web app); api-server still exposes `/sitemap.xml` for platform routing if needed.

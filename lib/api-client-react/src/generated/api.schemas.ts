@@ -13,6 +13,73 @@ export interface ApiMessage {
   message: string;
 }
 
+export interface RegisterInput {
+  /**
+     * @minLength 3
+     * @maxLength 320
+     */
+  email: string;
+  /**
+     * @minLength 8
+     * @maxLength 128
+     */
+  password: string;
+  /**
+     * @minLength 3
+     * @maxLength 30
+     */
+  username: string;
+  /**
+     * @minLength 1
+     * @maxLength 80
+     */
+  displayName: string;
+}
+
+export interface LoginInput {
+  /**
+     * @minLength 3
+     * @maxLength 320
+     */
+  email: string;
+  /**
+     * @minLength 1
+     * @maxLength 128
+     */
+  password: string;
+}
+
+export interface ChangePasswordInput {
+  /**
+     * @minLength 1
+     * @maxLength 128
+     */
+  currentPassword: string;
+  /**
+     * @minLength 8
+     * @maxLength 128
+     */
+  newPassword: string;
+}
+
+export interface ForgotPasswordInput {
+  /**
+     * @minLength 3
+     * @maxLength 320
+     */
+  email: string;
+}
+
+export interface ResetPasswordInput {
+  /** @minLength 1 */
+  token: string;
+  /**
+     * @minLength 8
+     * @maxLength 128
+     */
+  password: string;
+}
+
 export type UserRole = typeof UserRole[keyof typeof UserRole];
 
 
@@ -47,6 +114,12 @@ export interface User {
   answerCount: number;
   acceptedAnswerCount: number;
   createdAt: string;
+}
+
+export interface AuthSession {
+  user: User;
+  /** Opaque session token for Bearer auth (mobile). Also set as httpOnly cookie for web. */
+  token: string;
 }
 
 export interface TagInfo {

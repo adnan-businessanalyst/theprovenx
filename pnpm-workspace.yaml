@@ -4,6 +4,9 @@ packages:
   - lib/integrations/*
   - scripts
 
+allowBuilds:
+  argon2: set this to true or false
+
 autoInstallPeers: false
 
 catalog:
@@ -82,7 +85,7 @@ overrides:
   esbuild>@esbuild/sunos-x64: '-'
   esbuild>@esbuild/win32-arm64: '-'
   esbuild>@esbuild/win32-ia32: '-'
-  esbuild>@esbuild/win32-x64: '-'
+  # @esbuild/win32-x64 kept for local Windows builds (drizzle-kit, Next, API)
   lightningcss>lightningcss-android-arm64: '-'
   lightningcss>lightningcss-darwin-arm64: '-'
   lightningcss>lightningcss-darwin-x64: '-'

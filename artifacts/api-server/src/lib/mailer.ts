@@ -3,9 +3,8 @@ import { logger } from "./logger";
 /**
  * Pluggable email module (mail-server readiness scaffolding).
  *
- * Account emails (verification, forgot password) are handled by the auth
- * provider. This module exists for future product emails — digests,
- * announcements, moderation notices — and is transport-agnostic.
+ * Used for password-reset emails and future product emails (digests,
+ * announcements, moderation notices). Transport-agnostic.
  *
  * To plug in a real mail server later, implement MailTransport (e.g. with
  * nodemailer + SMTP env vars) and pass it to setMailTransport at startup.

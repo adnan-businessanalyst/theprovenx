@@ -9,10 +9,10 @@ import {
 
 export const usersTable = pgTable("users", {
   id: serial("id").primaryKey(),
-  clerkId: text("clerk_id").notNull().unique(),
   username: text("username").notNull().unique(),
   displayName: text("display_name").notNull(),
-  email: text("email"),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash"),
   avatarUrl: text("avatar_url"),
   bio: text("bio"),
   reputation: integer("reputation").notNull().default(1),

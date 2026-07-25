@@ -9,7 +9,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { type Href, Link, useRouter } from 'expo-router';
-import { useAuth, useSignUp } from '@clerk/expo';
+import { ApiError } from '@workspace/api-client-react';
+import { useAuth } from '@/lib/auth';
 import { useColors } from '@/hooks/useColors';
 import { BrandText, PillButton, fonts } from '@/components/ui';
 import { radiusPill } from '@/constants/colors';
@@ -18,37 +19,35 @@ export default function SignUpScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { signUp, errors, fetchStatus } = useSignUp();
-  const { isSignedIn } = useAuth();
+  const { signUp, isSignedIn } = useAuth();
 
   const [emailAddress, setEmailAddress] = useState('');
   const [password, setPassword] = useState('');
-  const [code, setCode] = useState('');
+  const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    const { error } = await signUp.password({ emailAddress, password });
-    if (error) return;
-    await signUp.verifications.sendEmailCode();
-  };
-
-  const handleVerify = async () => {
-    await signUp.verifications.verifyEmailCode({ code });
-    if (signUp.status === 'complete') {
-      await signUp.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            console.log(session.currentTask);
-            return;
-          }
-          const url = decorateUrl('/');
-          if (url.startsWith('http') && Platform.OS === 'web') {
-            window.location.href = url;
-          } else {
-            router.dismissAll();
-            router.replace(url as Href);
-          }
-        },
+    setError(null);
+    setLoading(true);
+    try {
+      await signUp({
+        email: emailAddress.trim(),
+        password,
+        username: username.trim(),
+        displayName: (displayName || username).trim(),
       });
+      router.dismissAll();
+      router.replace('/' as Href);
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message.replace(/^HTTP \d+ [^:]+:\s*/, '')
+          : 'Could not create account. Please try again.',
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,14 +61,7 @@ export default function SignUpScreen() {
     },
   ];
 
-  if (signUp.status === 'complete' || isSignedIn) {
-    return null;
-  }
-
-  const verifying =
-    signUp.status === 'missing_requirements' &&
-    signUp.unverifiedFields.includes('email_address') &&
-    signUp.missingFields.length === 0;
+  if (isSignedIn) return null;
 
   return (
     <KeyboardAwareScrollView
@@ -78,108 +70,71 @@ export default function SignUpScreen() {
       keyboardShouldPersistTaps="handled"
       bottomOffset={24}
     >
-      {verifying ? (
-        <>
-          <BrandText weight="extrabold" style={{ fontSize: 24, textAlign: 'center' }}>
-            Check your email
-          </BrandText>
-          <Text style={{ color: colors.mutedForeground, fontFamily: fonts.regular, fontSize: 14, textAlign: 'center' }}>
-            We sent a verification code to {emailAddress}
+      <BrandText weight="extrabold" style={{ fontSize: 24, textAlign: 'center' }}>
+        Create account
+      </BrandText>
+      <Text style={{ color: colors.mutedForeground, fontFamily: fonts.regular, fontSize: 14, textAlign: 'center' }}>
+        Join The Proven X community
+      </Text>
+
+      <TextInput
+        testID="input-display-name"
+        style={inputStyle}
+        value={displayName}
+        placeholder="Display name"
+        placeholderTextColor={colors.mutedForeground}
+        onChangeText={setDisplayName}
+      />
+      <TextInput
+        testID="input-username"
+        style={inputStyle}
+        autoCapitalize="none"
+        value={username}
+        placeholder="Username"
+        placeholderTextColor={colors.mutedForeground}
+        onChangeText={setUsername}
+      />
+      <TextInput
+        testID="input-email"
+        style={inputStyle}
+        autoCapitalize="none"
+        value={emailAddress}
+        placeholder="Email address"
+        placeholderTextColor={colors.mutedForeground}
+        onChangeText={setEmailAddress}
+        keyboardType="email-address"
+      />
+      <TextInput
+        testID="input-password"
+        style={inputStyle}
+        value={password}
+        placeholder="Password (min 8 characters)"
+        placeholderTextColor={colors.mutedForeground}
+        secureTextEntry
+        onChangeText={setPassword}
+      />
+      {error ? (
+        <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text>
+      ) : null}
+
+      <PillButton
+        label="Create account"
+        testID="button-sign-up"
+        disabled={!emailAddress || !password || !username}
+        loading={loading}
+        onPress={handleSubmit}
+      />
+
+      <View style={styles.linkRow}>
+        <Text style={{ color: colors.mutedForeground, fontFamily: fonts.regular, fontSize: 14 }}>
+          Already have an account?{' '}
+        </Text>
+        <Link href="/(auth)/sign-in" replace>
+          <Text style={{ color: colors.primary, fontFamily: fonts.semibold, fontSize: 14 }}>
+            Sign in
           </Text>
-          <TextInput
-            testID="input-code"
-            style={inputStyle}
-            value={code}
-            placeholder="Verification code"
-            placeholderTextColor={colors.mutedForeground}
-            onChangeText={setCode}
-            keyboardType="numeric"
-          />
-          {errors.fields.code && (
-            <Text style={[styles.error, { color: colors.destructive }]}>
-              {errors.fields.code.message}
-            </Text>
-          )}
-          <PillButton
-            label="Verify"
-            testID="button-verify"
-            loading={fetchStatus === 'fetching'}
-            disabled={!code}
-            onPress={handleVerify}
-          />
-          <PillButton
-            label="Send a new code"
-            variant="ghost"
-            onPress={() => signUp.verifications.sendEmailCode()}
-          />
-        </>
-      ) : (
-        <>
-          <BrandText weight="extrabold" style={{ fontSize: 24, textAlign: 'center' }}>
-            Join The Proven X
-          </BrandText>
-          <Text style={{ color: colors.mutedForeground, fontFamily: fonts.regular, fontSize: 14, textAlign: 'center' }}>
-            Ask questions, share answers, earn reputation
-          </Text>
-
-          <TextInput
-            testID="input-email"
-            style={inputStyle}
-            autoCapitalize="none"
-            value={emailAddress}
-            placeholder="Email address"
-            placeholderTextColor={colors.mutedForeground}
-            onChangeText={setEmailAddress}
-            keyboardType="email-address"
-          />
-          {errors.fields.emailAddress && (
-            <Text style={[styles.error, { color: colors.destructive }]}>
-              {errors.fields.emailAddress.message}
-            </Text>
-          )}
-          <TextInput
-            testID="input-password"
-            style={inputStyle}
-            value={password}
-            placeholder="Password (8+ characters)"
-            placeholderTextColor={colors.mutedForeground}
-            secureTextEntry
-            onChangeText={setPassword}
-          />
-          {errors.fields.password && (
-            <Text style={[styles.error, { color: colors.destructive }]}>
-              {errors.fields.password.message}
-            </Text>
-          )}
-          {(errors?.global?.length ?? 0) > 0 && (
-            <Text style={[styles.error, { color: colors.destructive }]}>
-              {errors?.global?.[0]?.message}
-            </Text>
-          )}
-
-          <PillButton
-            label="Create account"
-            testID="button-sign-up"
-            disabled={!emailAddress || !password}
-            loading={fetchStatus === 'fetching'}
-            onPress={handleSubmit}
-          />
-
-          <View style={styles.linkRow}>
-            <Text style={{ color: colors.mutedForeground, fontFamily: fonts.regular, fontSize: 14 }}>
-              Already a member?{' '}
-            </Text>
-            <Link href="/(auth)/sign-in" replace>
-              <Text style={{ color: colors.primary, fontFamily: fonts.semibold, fontSize: 14 }}>
-                Sign in
-              </Text>
-            </Link>
-          </View>
-        </>
-      )}
-
-      {/* Required for sign-up flows. Clerk's bot sign-up protection is enabled by default */}
-      <View nativeID="clerk-captcha" />
+        </Link>
+      </View>
     </KeyboardAwareScrollView>
   );
 }
@@ -205,5 +160,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    flexWrap: 'wrap',
   },
 });

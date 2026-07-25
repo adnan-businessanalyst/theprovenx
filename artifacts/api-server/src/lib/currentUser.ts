@@ -1,77 +1,19 @@
 import type { Request, Response, NextFunction } from "express";
-import { getAuth, clerkClient } from "@clerk/express";
-import { eq, sql } from "drizzle-orm";
-import { db, usersTable, type User } from "@workspace/db";
+import type { User } from "@workspace/db";
+import {
+  extractBearerToken,
+  resolveUserFromSessionToken,
+  SESSION_COOKIE,
+} from "./session";
 
-function slugifyUsername(input: string): string {
-  const base = input
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 30);
-  return base || "member";
-}
-
-/** Find or JIT-provision the local user row bridged from Clerk identity. */
+/** Resolve the local user from session cookie or Bearer token. */
 export async function resolveLocalUser(req: Request): Promise<User | null> {
-  const auth = getAuth(req);
-  const clerkId = auth?.userId;
-  if (!clerkId) return null;
-
-  const [existing] = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.clerkId, clerkId));
-  if (existing) return existing;
-
-  // JIT provision from Clerk profile
-  let displayName = "Member";
-  let email: string | null = null;
-  let avatarUrl: string | null = null;
-  let usernameSeed = "member";
-  try {
-    const cu = await clerkClient.users.getUser(clerkId);
-    email = cu.primaryEmailAddress?.emailAddress ?? null;
-    avatarUrl = cu.imageUrl ?? null;
-    displayName =
-      [cu.firstName, cu.lastName].filter(Boolean).join(" ") ||
-      cu.username ||
-      email?.split("@")[0] ||
-      "Member";
-    usernameSeed = cu.username || email?.split("@")[0] || displayName;
-  } catch (err) {
-    req.log.warn({ err }, "Failed to fetch Clerk profile, using defaults");
-    usernameSeed = `member-${clerkId.slice(-8)}`;
-  }
-
-  // First user to join the community becomes the admin
-  const [{ count }] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(usersTable);
-  const role = count === 0 ? "admin" : "member";
-
-  let username = slugifyUsername(usernameSeed);
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const candidate =
-      attempt === 0
-        ? username
-        : `${username}-${Math.random().toString(36).slice(2, 6)}`;
-    try {
-      const [created] = await db
-        .insert(usersTable)
-        .values({ clerkId, username: candidate, displayName, email, avatarUrl, role })
-        .returning();
-      return created;
-    } catch {
-      // Unique violation (username or concurrent clerkId insert) — re-check
-      const [raced] = await db
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.clerkId, clerkId));
-      if (raced) return raced;
-    }
-  }
-  return null;
+  const cookieToken =
+    (req.cookies?.[SESSION_COOKIE] as string | undefined) ?? null;
+  const bearerToken = extractBearerToken(req.header("authorization"));
+  const rawToken = bearerToken || cookieToken;
+  if (!rawToken) return null;
+  return resolveUserFromSessionToken(rawToken);
 }
 
 /** Attaches req.localUser when signed in; never blocks. */
@@ -80,8 +22,12 @@ export async function attachUser(
   _res: Response,
   next: NextFunction,
 ): Promise<void> {
-  const user = await resolveLocalUser(req);
-  if (user) req.localUser = user;
+  try {
+    const user = await resolveLocalUser(req);
+    if (user) req.localUser = user;
+  } catch (err) {
+    req.log?.warn({ err }, "Failed to resolve session user");
+  }
   next();
 }
 
@@ -110,7 +56,10 @@ export function requireAdmin(
     res.status(401).json({ message: "Sign in required" });
     return;
   }
-  if (req.localUser.role !== "admin" && req.localUser.role !== "platform_owner") {
+  if (
+    req.localUser.role !== "admin" &&
+    req.localUser.role !== "platform_owner"
+  ) {
     res.status(403).json({ message: "Admin access required" });
     return;
   }
@@ -126,7 +75,11 @@ export function requireModerator(
     res.status(401).json({ message: "Sign in required" });
     return;
   }
-  if (req.localUser.role !== "admin" && req.localUser.role !== "moderator" && req.localUser.role !== "platform_owner") {
+  if (
+    req.localUser.role !== "admin" &&
+    req.localUser.role !== "moderator" &&
+    req.localUser.role !== "platform_owner"
+  ) {
     res.status(403).json({ message: "Moderator access required" });
     return;
   }

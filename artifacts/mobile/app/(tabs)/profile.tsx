@@ -2,9 +2,9 @@ import React from 'react';
 import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useAuth, useClerk } from '@clerk/expo';
 import { useQueryClient } from '@tanstack/react-query';
 import { useGetMe } from '@workspace/api-client-react';
+import { useAuth } from '@/lib/auth';
 import { useColors } from '@/hooks/useColors';
 import {
   Avatar,
@@ -21,8 +21,7 @@ export default function ProfileScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { isSignedIn } = useAuth();
-  const { signOut } = useClerk();
+  const { isSignedIn, signOut } = useAuth();
   const queryClient = useQueryClient();
 
   const topInset = Platform.OS === 'web' ? 67 : insets.top;

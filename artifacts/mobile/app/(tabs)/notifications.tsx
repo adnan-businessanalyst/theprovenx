@@ -11,7 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { useAuth } from '@clerk/expo';
+import { useAuth } from '@/lib/auth';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useListNotifications,

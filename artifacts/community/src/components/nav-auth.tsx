@@ -11,7 +11,6 @@ import {
   getListNotificationsQueryKey,
   useMarkNotificationsRead,
 } from "@workspace/api-client-react";
-import { useClerk, useUser } from "@clerk/nextjs";
 import {
   Bell,
   Settings,
@@ -32,18 +31,18 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/lib/auth";
 
 export function NavAuth() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const { signOut } = useClerk();
-  const { user: clerkUser, isLoaded } = useUser();
+  const { isLoaded, isSignedIn, signOut } = useAuth();
   const queryClient = useQueryClient();
   const setLocation = (to: string) => router.push(to);
 
   const { data: me } = useGetMe({
     query: {
-      enabled: isLoaded && !!clerkUser,
+      enabled: isLoaded && isSignedIn,
       queryKey: getGetMeQueryKey(),
       retry: false,
     },
@@ -71,6 +70,12 @@ export function NavAuth() {
     };
     return () => evtSource.close();
   }, [me, queryClient]);
+
+  if (!isLoaded) {
+    return (
+      <div className="h-9 w-20 animate-pulse rounded-full bg-muted/60" aria-hidden />
+    );
+  }
 
   if (!me) {
     return (
@@ -207,7 +212,10 @@ export function NavAuth() {
           )}
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => signOut({ redirectUrl: "/" })}
+            onClick={async () => {
+              await signOut();
+              router.push("/");
+            }}
             className="cursor-pointer text-destructive focus:text-destructive rounded-md"
           >
             <LogOut className="mr-2 h-4 w-4" /> {t("nav.sign_out")}
@@ -219,16 +227,5 @@ export function NavAuth() {
 }
 
 export function NavAuthGate() {
-  const { t } = useTranslation();
-  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
-    return (
-      <Link
-        href="/sign-in"
-        className="px-3 sm:px-5 py-2 bg-primary/10 text-primary hover:bg-primary/20 font-medium rounded-full transition-colors flex items-center gap-2 whitespace-nowrap"
-      >
-        {t("nav.sign_in")}
-      </Link>
-    );
-  }
   return <NavAuth />;
 }
