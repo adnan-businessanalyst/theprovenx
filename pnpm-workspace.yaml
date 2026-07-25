@@ -4,8 +4,14 @@ packages:
   - lib/integrations/*
   - scripts
 
+# pnpm 11+: dependency postinstall/build scripts must be explicitly allowed
 allowBuilds:
-  argon2: set this to true or false
+  "@swc/core": true
+  esbuild: true
+  msw: true
+  sharp: true
+  unrs-resolver: true
+  argon2: false
 
 autoInstallPeers: false
 
