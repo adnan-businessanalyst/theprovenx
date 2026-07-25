@@ -89,11 +89,12 @@ export default function Layout({ children }: { children: ReactNode }) {
         <header className="mx-auto max-w-6xl rounded-full border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-md transition-all">
           <div className="px-6 flex h-16 items-center gap-4">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 mr-2 hover-elevate rounded-full p-1 transition-all shrink-0">
-              <img src="/logo.svg" alt="The Proven X" className="h-9 w-9" />
-              <span className="hidden md:inline font-serif font-bold text-xl tracking-tight text-primary">
-                The Proven X
-              </span>
+            <Link href="/" className="flex items-center mr-2 hover-elevate rounded-full px-1 py-0.5 transition-all shrink-0">
+              <img
+                src="/logo.png"
+                alt="The Proven X"
+                className="h-10 w-auto max-w-[min(220px,42vw)] object-contain"
+              />
             </Link>
 
             {/* Navigation Links */}
@@ -192,7 +193,11 @@ export default function Layout({ children }: { children: ReactNode }) {
       <footer className="border-t bg-card mt-auto">
         <div className="container mx-auto max-w-6xl px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="The Proven X" className="h-6 w-6 opacity-50 grayscale" />
+            <img
+              src="/logo.png"
+              alt="The Proven X"
+              className="h-8 w-auto max-w-[140px] object-contain opacity-70"
+            />
             <span>&copy; {new Date().getFullYear()} {t("footer.copyright")}</span>
           </div>
           <div className="flex flex-wrap gap-4">

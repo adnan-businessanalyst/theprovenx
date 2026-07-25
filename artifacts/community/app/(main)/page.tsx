@@ -29,7 +29,7 @@ export default function HomePage() {
       "@type": "Organization",
       name: SITE_NAME,
       url: absoluteUrl("/"),
-      logo: absoluteUrl("/logo.svg"),
+      logo: absoluteUrl("/logo.png"),
     },
   ];
 
