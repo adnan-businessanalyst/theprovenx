@@ -1,0 +1,24 @@
+kind = "web"
+previewPath = "/"
+title = "Niche Q&A Community"
+version = "1.0.0"
+id = "artifacts/community"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21400
+
+[services.development]
+run = "pnpm --filter @workspace/community run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/community", "run", "build" ]
+# Next.js Node server (not static SPA)
+run = "pnpm --filter @workspace/community run start"
+
+[services.env]
+PORT = "21400"
+NEXT_PUBLIC_SITE_URL = "http://localhost:21400"
+API_URL = "http://localhost:8080"

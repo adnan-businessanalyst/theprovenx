@@ -1,0 +1,210 @@
+"use client";
+
+import { ReactNode, useEffect, useState, useMemo } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
+import { Search as SearchIcon, Menu, Globe } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { HeroVisibilityContext } from "@/lib/hero-visibility";
+import { NavAuthGate } from "@/components/nav-auth";
+
+const LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "ar", label: "العربية" },
+  { code: "tl", label: "Tagalog" },
+  { code: "hi", label: "हिन्दी" },
+  { code: "zh", label: "中文" },
+  { code: "fr", label: "Français" },
+  { code: "es", label: "Español" },
+  { code: "ru", label: "Русский" },
+  { code: "uk", label: "Українська" },
+  { code: "fa", label: "فارسی" },
+  { code: "ur", label: "اردو" },
+  { code: "bn", label: "বাংলা" },
+  { code: "tr", label: "Türkçe" },
+];
+
+export default function Layout({ children }: { children: ReactNode }) {
+  const { t, i18n } = useTranslation();
+  const pathname = usePathname();
+  const router = useRouter();
+  const setLocation = (to: string) => router.push(to);
+
+  const changeLanguage = (code: string) => {
+    i18n.changeLanguage(code);
+    window.localStorage.setItem("i18nextLng", code);
+  };
+
+  // Nav Ask button: hidden while the home hero is visible; bounces in when it
+  // appears, then re-bounces at a random interval every 3-30 seconds.
+  const [heroVisible, setHeroVisible] = useState<boolean | null>(null);
+  const heroCtx = useMemo(() => ({ heroVisible, setHeroVisible }), [heroVisible]);
+  const isHome = pathname === "/";
+  // On home, stay hidden until the hero has been measured and scrolled past.
+  const askVisible = isHome ? heroVisible === false : true;
+  const [bouncing, setBouncing] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const q = (new FormData(e.currentTarget).get("q") as string)?.trim();
+    if (q) {
+      setSearchOpen(false);
+      setLocation(`/search?q=${encodeURIComponent(q)}`);
+    }
+  };
+
+  useEffect(() => {
+    if (!askVisible) {
+      setBouncing(false);
+      return;
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setBouncing(true);
+    let tid: number;
+    const schedule = () => {
+      tid = window.setTimeout(() => {
+        setBouncing(true);
+        schedule();
+      }, 3000 + Math.random() * 27000);
+    };
+    schedule();
+    return () => window.clearTimeout(tid);
+  }, [askVisible]);
+
+  return (
+    <HeroVisibilityContext.Provider value={heroCtx}>
+    <div className="min-h-[100dvh] flex flex-col font-sans bg-muted/20">
+      <div className="sticky top-4 z-50 w-full px-4">
+        <header className="mx-auto max-w-6xl rounded-full border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-md transition-all">
+          <div className="px-6 flex h-16 items-center gap-4">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2 mr-2 hover-elevate rounded-full p-1 transition-all shrink-0">
+              <img src="/logo.svg" alt="The Proven X" className="h-9 w-9" />
+              <span className="hidden md:inline font-serif font-bold text-xl tracking-tight text-primary">
+                The Proven X
+              </span>
+            </Link>
+
+            {/* Navigation Links */}
+            <nav className="hidden md:flex items-center gap-1 text-sm font-medium text-muted-foreground mr-auto">
+              <Link href="/about" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.about")}</Link>
+              <Link href="/products" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.products")}</Link>
+              <Link href="/blog" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.blog")}</Link>
+              <Link href="/contributors" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.contributors")}</Link>
+            </nav>
+
+            <div className="flex-1 md:hidden"></div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" className="rounded-full hidden sm:flex" onClick={() => setSearchOpen(true)} aria-label={t("nav.search")}>
+                <SearchIcon className="h-4 w-4" />
+              </Button>
+
+              <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
+                <DialogContent className="sm:max-w-lg top-[20%] translate-y-0 rounded-3xl p-6">
+                  <DialogHeader>
+                    <DialogTitle className="font-serif">{t("nav.search")}</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+                    <SearchIcon className="absolute left-4 rtl:left-auto rtl:right-4 h-4 w-4 text-muted-foreground z-10" />
+                    <Input
+                      name="q"
+                      type="search"
+                      autoFocus
+                      placeholder={t("search.placeholder")}
+                      className="w-full pl-11 pr-4 rtl:pl-4 rtl:pr-11 h-12 rounded-full"
+                    />
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              {/* Language Switcher */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Globe className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto rounded-xl">
+                  {LANGUAGES.map((lang) => (
+                    <DropdownMenuItem
+                      key={lang.code}
+                      onClick={() => changeLanguage(lang.code)}
+                      className={i18n.language === lang.code ? "bg-muted font-bold" : ""}
+                    >
+                      {lang.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Link
+                href="/ask"
+                aria-hidden={!askVisible}
+                tabIndex={askVisible ? undefined : -1}
+                onAnimationEnd={() => setBouncing(false)}
+                className={`inline-flex px-3 sm:px-5 py-2 bg-primary text-primary-foreground font-medium rounded-full shadow-sm hover:shadow-md hover:bg-primary/90 transition-all items-center gap-1.5 text-sm ${askVisible ? (bouncing ? "animate-ask-bounce" : "") : "invisible pointer-events-none"}`}
+              >
+                <span className="hidden sm:inline">{t("nav.ask")}</span>
+                <span className="sm:hidden text-lg leading-none mb-[2px]">+</span>
+              </Link>
+
+              <NavAuthGate />
+              
+              {/* Mobile menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild className="md:hidden">
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 rounded-xl">
+                  <DropdownMenuItem onClick={() => setLocation('/about')} className="rounded-md">{t("nav.about")}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setLocation('/products')} className="rounded-md">{t("nav.products")}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setLocation('/blog')} className="rounded-md">{t("nav.blog")}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setLocation('/contributors')} className="rounded-md">{t("nav.contributors")}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSearchOpen(true)} className="rounded-md">{t("nav.search")}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setLocation('/ask')} className="font-bold text-primary rounded-md">{t("nav.ask")}</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+            </div>
+          </div>
+        </header>
+      </div>
+
+      <main className="flex-1 container mx-auto max-w-6xl px-4 py-8">
+        {children}
+      </main>
+
+      <footer className="border-t bg-card mt-auto">
+        <div className="container mx-auto max-w-6xl px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <img src="/logo.svg" alt="The Proven X" className="h-6 w-6 opacity-50 grayscale" />
+            <span>&copy; {new Date().getFullYear()} {t("footer.copyright")}</span>
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/tags" className="hover:text-foreground transition-colors">{t("nav.tags")}</Link>
+            <Link href="/contributors" className="hover:text-foreground transition-colors">{t("nav.contributors")}</Link>
+            <Link href="/" className="hover:text-foreground transition-colors">{t("footer.terms")}</Link>
+            <Link href="/" className="hover:text-foreground transition-colors">{t("footer.privacy")}</Link>
+            <Link href="/" className="hover:text-foreground transition-colors">{t("footer.help")}</Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+    </HeroVisibilityContext.Provider>
+  );
+}

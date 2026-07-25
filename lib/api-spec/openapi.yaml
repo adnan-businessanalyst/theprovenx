@@ -1,0 +1,1281 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: users
+  - name: questions
+  - name: answers
+  - name: comments
+  - name: tagsApi
+  - name: categories
+  - name: search
+  - name: notifications
+  - name: translation
+  - name: flags
+  - name: admin
+  - name: stats
+  - name: sponsors
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /me:
+    get:
+      operationId: getMe
+      tags: [users]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+    patch:
+      operationId: updateMe
+      tags: [users]
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfileUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /users/top:
+    get:
+      operationId: listTopUsers
+      tags: [users]
+      summary: Top contributors leaderboard
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          description: Top users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+  /users/top-verifiers:
+    get:
+      operationId: listTopVerifiers
+      tags: [users]
+      summary: Members with the most accepted (verified) answers in the last 30 days
+      responses:
+        "200":
+          description: Top verifiers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TopVerifier"
+  /users/{username}:
+    get:
+      operationId: getUserProfile
+      tags: [users]
+      summary: Public profile with stats
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Public profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /users/{username}/activity:
+    get:
+      operationId: getUserActivity
+      tags: [users]
+      summary: Recent activity for a user
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Activity items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+  /questions:
+    get:
+      operationId: listQuestions
+      tags: [questions]
+      summary: List questions
+      parameters:
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [newest, active, votes, unanswered]
+            default: newest
+        - name: tag
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          description: Paginated questions (featured first on page 1 of newest)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionList"
+    post:
+      operationId: createQuestion
+      tags: [questions]
+      summary: Ask a question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionInput"
+      responses:
+        "201":
+          description: Created question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+        "429":
+          description: Rate limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /questions/featured:
+    get:
+      operationId: listFeaturedQuestions
+      tags: [questions]
+      summary: Pinned/featured questions
+      responses:
+        "200":
+          description: Featured questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Question"
+  /questions/{slug}:
+    get:
+      operationId: getQuestion
+      tags: [questions]
+      summary: Get question detail by slug (increments view count)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Question detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /questions/{id}/vote:
+    post:
+      operationId: voteQuestion
+      tags: [questions]
+      summary: Vote on a question
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoteInput"
+      responses:
+        "200":
+          description: New score
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoteResult"
+  /questions/{id}/answers:
+    post:
+      operationId: createAnswer
+      tags: [answers]
+      summary: Post an answer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnswerInput"
+      responses:
+        "201":
+          description: Created answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Answer"
+  /questions/{id}/related:
+    get:
+      operationId: listRelatedQuestions
+      tags: [questions]
+      summary: Related questions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Related questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Question"
+  /answers/{id}/vote:
+    post:
+      operationId: voteAnswer
+      tags: [answers]
+      summary: Vote on an answer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoteInput"
+      responses:
+        "200":
+          description: New score
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoteResult"
+  /answers/{id}/accept:
+    post:
+      operationId: acceptAnswer
+      tags: [answers]
+      summary: Mark answer as accepted (question author only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Accepted answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Answer"
+        "403":
+          description: Not the question author
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /comments:
+    post:
+      operationId: createComment
+      tags: [comments]
+      summary: Comment on a question or answer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentInput"
+      responses:
+        "201":
+          description: Created comment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List categories with question counts
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryInfo"
+  /tags:
+    get:
+      operationId: listTags
+      tags: [tagsApi]
+      summary: List tags with question counts
+      responses:
+        "200":
+          description: Tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TagInfo"
+  /search:
+    get:
+      operationId: searchQuestions
+      tags: [search]
+      summary: Full-text search across questions and answers
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+        - name: tag
+          in: query
+          schema: { type: string }
+        - name: unanswered
+          in: query
+          schema: { type: boolean }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionList"
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List my notifications
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 30 }
+      responses:
+        "200":
+          description: Notifications with unread count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationList"
+  /notifications/read:
+    post:
+      operationId: markNotificationsRead
+      tags: [notifications]
+      summary: Mark notifications as read (all, or specific ids)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationReadInput"
+      responses:
+        "200":
+          description: Updated unread count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationList"
+  /translate:
+    post:
+      operationId: translateContent
+      tags: [translation]
+      summary: Translate a question or answer to English or Arabic (cached)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TranslationRequest"
+      responses:
+        "200":
+          description: Translated content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranslationResult"
+  /flags:
+    post:
+      operationId: createFlag
+      tags: [flags]
+      summary: Report content as spam/abusive
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FlagInput"
+      responses:
+        "201":
+          description: Flag recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /sponsor-inquiries:
+    post:
+      operationId: createSponsorInquiry
+      tags: [sponsors]
+      summary: Submit a sponsor/advertising inquiry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SponsorInquiryInput"
+      responses:
+        "201":
+          description: Inquiry received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+        "429":
+          description: Rate limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /admin/sponsor-inquiries:
+    get:
+      operationId: listSponsorInquiriesAdmin
+      tags: [admin]
+      summary: List sponsor inquiries (admin only)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [new, contacted, closed]
+      responses:
+        "200":
+          description: Sponsor inquiries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SponsorInquiry"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /admin/sponsor-inquiries/{id}:
+    patch:
+      operationId: updateSponsorInquiryAdmin
+      tags: [admin]
+      summary: Update a sponsor inquiry's follow-up status (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SponsorInquiryStatusUpdate"
+      responses:
+        "200":
+          description: Updated inquiry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SponsorInquiry"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /stats/summary:
+    get:
+      operationId: getCommunityStats
+      tags: [stats]
+      summary: Community-wide stats for the home page
+      responses:
+        "200":
+          description: Community stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityStats"
+  /admin/overview:
+    get:
+      operationId: getAdminOverview
+      tags: [admin]
+      summary: Admin dashboard stats
+      responses:
+        "200":
+          description: Admin stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOverview"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /admin/flags:
+    get:
+      operationId: listFlags
+      tags: [admin]
+      summary: List open content flags
+      responses:
+        "200":
+          description: Flags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Flag"
+  /admin/flags/{id}/resolve:
+    post:
+      operationId: resolveFlag
+      tags: [admin]
+      summary: Resolve a flag (dismiss or remove content)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FlagResolution"
+      responses:
+        "200":
+          description: Resolved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /admin/users:
+    get:
+      operationId: listUsersAdmin
+      tags: [admin]
+      summary: List users for moderation
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+  /admin/users/{id}:
+    patch:
+      operationId: updateUserAdmin
+      tags: [admin]
+      summary: Update user role / suspension
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserAdminUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /admin/questions/{id}:
+    delete:
+      operationId: deleteQuestionAdmin
+      tags: [admin]
+      summary: Remove a question
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+    patch:
+      operationId: featureQuestionAdmin
+      tags: [admin]
+      summary: Pin/unpin (feature) a question
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionFeatureUpdate"
+      responses:
+        "200":
+          description: Updated question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+  /admin/answers/{id}:
+    delete:
+      operationId: deleteAnswerAdmin
+      tags: [admin]
+      summary: Remove an answer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /admin/tags:
+    post:
+      operationId: createTagAdmin
+      tags: [admin]
+      summary: Create a tag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagCreate"
+      responses:
+        "201":
+          description: Created tag
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagInfo"
+  /admin/categories:
+    post:
+      operationId: createCategoryAdmin
+      tags: [admin]
+      summary: Create a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryCreate"
+      responses:
+        "201":
+          description: Created category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryInfo"
+  /admin/categories/{id}:
+    patch:
+      operationId: updateCategoryAdmin
+      tags: [admin]
+      summary: Edit a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryUpdate"
+      responses:
+        "200":
+          description: Updated category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryInfo"
+    delete:
+      operationId: deleteCategoryAdmin
+      tags: [admin]
+      summary: Delete a category (questions keep working, become uncategorized)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /admin/tags/{id}:
+    patch:
+      operationId: updateTagAdmin
+      tags: [admin]
+      summary: Edit a tag
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagUpdate"
+      responses:
+        "200":
+          description: Updated tag
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagInfo"
+    delete:
+      operationId: deleteTagAdmin
+      tags: [admin]
+      summary: Delete a tag
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /admin/transactions:
+    get:
+      operationId: listTransactionsAdmin
+      tags: [admin]
+      summary: List payment transactions (payment-gateway-ready scaffolding)
+      responses:
+        "200":
+          description: Transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status: { type: string }
+      required: [status]
+    ApiMessage:
+      type: object
+      properties:
+        message: { type: string }
+      required: [message]
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        displayName: { type: string }
+        avatarUrl: { type: ["string", "null"] }
+        bio: { type: ["string", "null"] }
+        reputation: { type: integer }
+        role:
+          type: string
+          enum: [member, moderator, admin, platform_owner]
+        plan:
+          type: string
+          enum: [free, pro]
+        isSuspended: { type: boolean }
+        questionCount: { type: integer }
+        answerCount: { type: integer }
+        acceptedAnswerCount: { type: integer }
+        createdAt: { type: string }
+      required:
+        [id, username, displayName, reputation, role, plan, isSuspended, questionCount, answerCount, acceptedAnswerCount, createdAt]
+    UserProfile:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        badges:
+          type: array
+          items: { type: string }
+        topTags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagInfo"
+        recentQuestions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Question"
+        recentAnswers:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityItem"
+      required: [user, badges, topTags, recentQuestions, recentAnswers]
+    TopVerifier:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        verifiedCount: { type: integer }
+      required: [user, verifiedCount]
+    UserProfileUpdate:
+      type: object
+      properties:
+        displayName: { type: string, minLength: 1, maxLength: 80 }
+        bio: { type: string, maxLength: 1000 }
+    UserAdminUpdate:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [member, moderator, admin]
+        isSuspended: { type: boolean }
+    ActivityItem:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [question, answer, accepted]
+        questionId: { type: integer }
+        questionSlug: { type: string }
+        questionTitle: { type: string }
+        score: { type: integer }
+        createdAt: { type: string }
+      required: [type, questionId, questionSlug, questionTitle, score, createdAt]
+    Question:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        title: { type: string }
+        body: { type: string }
+        language: { type: string }
+        author:
+          $ref: "#/components/schemas/User"
+        tags:
+          type: array
+          items: { type: string }
+        category:
+          oneOf:
+            - $ref: "#/components/schemas/CategoryRef"
+            - type: "null"
+        score: { type: integer }
+        answerCount: { type: integer }
+        viewCount: { type: integer }
+        hasAcceptedAnswer: { type: boolean }
+        isFeatured: { type: boolean }
+        myVote: { type: ["integer", "null"] }
+        createdAt: { type: string }
+        updatedAt: { type: string }
+      required:
+        [id, slug, title, body, language, author, tags, score, answerCount, viewCount, hasAcceptedAnswer, isFeatured, createdAt, updatedAt]
+    QuestionDetail:
+      type: object
+      properties:
+        question:
+          $ref: "#/components/schemas/Question"
+        answers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Answer"
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+      required: [question, answers, comments]
+    QuestionList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Question"
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+      required: [items, total, page, pageSize]
+    QuestionInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 10, maxLength: 200 }
+        body: { type: string, minLength: 20, maxLength: 30000 }
+        tags:
+          type: array
+          items: { type: string }
+          minItems: 1
+          maxItems: 5
+        categorySlug: { type: string, minLength: 1 }
+        language: { type: string }
+        website: { type: string, description: "Honeypot field - must be empty" }
+      required: [title, body, tags, categorySlug]
+    QuestionFeatureUpdate:
+      type: object
+      properties:
+        isFeatured: { type: boolean }
+      required: [isFeatured]
+    Answer:
+      type: object
+      properties:
+        id: { type: integer }
+        questionId: { type: integer }
+        body: { type: string }
+        language: { type: string }
+        author:
+          $ref: "#/components/schemas/User"
+        score: { type: integer }
+        isAccepted: { type: boolean }
+        myVote: { type: ["integer", "null"] }
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+        createdAt: { type: string }
+      required: [id, questionId, body, language, author, score, isAccepted, comments, createdAt]
+    AnswerInput:
+      type: object
+      properties:
+        body: { type: string, minLength: 20, maxLength: 30000 }
+        language: { type: string }
+        website: { type: string, description: "Honeypot field - must be empty" }
+      required: [body]
+    Comment:
+      type: object
+      properties:
+        id: { type: integer }
+        parentType:
+          type: string
+          enum: [question, answer]
+        parentId: { type: integer }
+        body: { type: string }
+        author:
+          $ref: "#/components/schemas/User"
+        createdAt: { type: string }
+      required: [id, parentType, parentId, body, author, createdAt]
+    CommentInput:
+      type: object
+      properties:
+        parentType:
+          type: string
+          enum: [question, answer]
+        parentId: { type: integer }
+        body: { type: string, minLength: 5, maxLength: 1000 }
+        website: { type: string, description: "Honeypot field - must be empty" }
+      required: [parentType, parentId, body]
+    VoteInput:
+      type: object
+      properties:
+        value:
+          type: integer
+          enum: [-1, 0, 1]
+      required: [value]
+    VoteResult:
+      type: object
+      properties:
+        score: { type: integer }
+        myVote: { type: integer }
+      required: [score, myVote]
+    TagInfo:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        description: { type: ["string", "null"] }
+        questionCount: { type: integer }
+      required: [id, slug, name, questionCount]
+    TagUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 50 }
+        description: { type: string, maxLength: 500 }
+    TagCreate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 50 }
+        description: { type: string, maxLength: 500 }
+      required: [name]
+    CategoryRef:
+      type: object
+      properties:
+        slug: { type: string }
+        name: { type: string }
+      required: [slug, name]
+    CategoryInfo:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        description: { type: ["string", "null"] }
+        questionCount: { type: integer }
+      required: [id, slug, name, questionCount]
+    CategoryCreate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 60 }
+        description: { type: string, maxLength: 500 }
+      required: [name]
+    CategoryUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 60 }
+        description: { type: string, maxLength: 500 }
+    NotificationItem:
+      type: object
+      properties:
+        id: { type: integer }
+        type:
+          type: string
+          enum: [new_answer, new_comment, answer_accepted, mention]
+        message: { type: string }
+        link: { type: string }
+        isRead: { type: boolean }
+        createdAt: { type: string }
+      required: [id, type, message, link, isRead, createdAt]
+    NotificationList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotificationItem"
+        unreadCount: { type: integer }
+      required: [items, unreadCount]
+    NotificationReadInput:
+      type: object
+      properties:
+        ids:
+          type: array
+          items: { type: integer }
+          description: "Specific notification ids; omit to mark all read"
+    TranslationRequest:
+      type: object
+      properties:
+        contentType:
+          type: string
+          enum: [question, answer]
+        contentId: { type: integer }
+        target:
+          type: string
+          enum: [en, ar]
+      required: [contentType, contentId, target]
+    TranslationResult:
+      type: object
+      properties:
+        title: { type: ["string", "null"] }
+        body: { type: string }
+        target: { type: string }
+        cached: { type: boolean }
+      required: [body, target, cached]
+    FlagInput:
+      type: object
+      properties:
+        contentType:
+          type: string
+          enum: [question, answer, comment]
+        contentId: { type: integer }
+        reason: { type: string, minLength: 5, maxLength: 500 }
+      required: [contentType, contentId, reason]
+    Flag:
+      type: object
+      properties:
+        id: { type: integer }
+        contentType: { type: string }
+        contentId: { type: integer }
+        reason: { type: string }
+        status:
+          type: string
+          enum: [open, dismissed, removed]
+        reporter:
+          $ref: "#/components/schemas/User"
+        contentPreview: { type: string }
+        contentLink: { type: string }
+        createdAt: { type: string }
+      required: [id, contentType, contentId, reason, status, reporter, contentPreview, contentLink, createdAt]
+    FlagResolution:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [dismiss, remove_content]
+      required: [action]
+    SponsorInquiryInput:
+      type: object
+      properties:
+        company: { type: string, minLength: 1, maxLength: 200 }
+        contactName: { type: string, minLength: 1, maxLength: 120 }
+        email: { type: string, pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", maxLength: 254 }
+        budgetRange:
+          type: string
+          enum: [under_1k, 1k_5k, 5k_20k, over_20k, undecided]
+        message: { type: string, minLength: 10, maxLength: 2000 }
+        website: { type: string, maxLength: 200 }
+      required: [company, contactName, email, budgetRange, message]
+    SponsorInquiry:
+      type: object
+      properties:
+        id: { type: integer }
+        company: { type: string }
+        contactName: { type: string }
+        email: { type: string }
+        budgetRange:
+          type: string
+          enum: [under_1k, 1k_5k, 5k_20k, over_20k, undecided]
+        message: { type: string }
+        status:
+          type: string
+          enum: [new, contacted, closed]
+        createdAt: { type: string }
+      required: [id, company, contactName, email, budgetRange, message, status, createdAt]
+    SponsorInquiryStatusUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [new, contacted, closed]
+      required: [status]
+    CommunityStats:
+      type: object
+      properties:
+        questionCount: { type: integer }
+        answerCount: { type: integer }
+        userCount: { type: integer }
+        answeredRate: { type: number }
+      required: [questionCount, answerCount, userCount, answeredRate]
+    AdminOverview:
+      type: object
+      properties:
+        questionCount: { type: integer }
+        answerCount: { type: integer }
+        userCount: { type: integer }
+        openFlagCount: { type: integer }
+        questionsToday: { type: integer }
+        answersToday: { type: integer }
+        newUsersToday: { type: integer }
+      required: [questionCount, answerCount, userCount, openFlagCount, questionsToday, answersToday, newUsersToday]
+    Transaction:
+      type: object
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        username: { type: string }
+        amountCents: { type: integer }
+        currency: { type: string }
+        status:
+          type: string
+          enum: [pending, completed, failed, refunded]
+        description: { type: string }
+        createdAt: { type: string }
+      required: [id, userId, username, amountCents, currency, status, description, createdAt]
