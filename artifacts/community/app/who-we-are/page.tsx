@@ -49,12 +49,12 @@ export default function WhoWeArePage() {
       <main>
         <Hero />
         <WhyWeStarted />
-        <WhatWeDo />
         <ProvenSection />
-        <Approach />
         <Founder />
         <ProofBoard />
         <Direction />
+        <WhatWeDo />
+        <Approach />
         <ClosingCta />
       </main>
       <WhoWeAreFooter />

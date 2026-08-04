@@ -23,14 +23,14 @@ export const whoWeAre = {
     lines: [
       { text: "Real experience.", color: "ink" as const },
       { text: "Useful answers.", color: "orange" as const },
-      { text: "Practical digital solutions.", color: "blue" as const },
+      { text: "Digital solutions.", color: "blue" as const },
     ],
     lead:
-      "TheProvenX is a Saudi-based answers community and digital solutions company. We help people find guidance they can trust, and help businesses build a presence that actually gets found.",
+      "TheProvenX is a Saudi-based answers community and software company. We help people find guidance they can trust, and help businesses build a presence that actually gets found.",
     chips: [
       { n: "01", label: "Answers community" },
-      { n: "02", label: "Websites & e-stores" },
-      { n: "03", label: "SaaS solutions" },
+      { n: "02", label: "Software development" },
+      // { n: "03", label: "SaaS solutions" },
     ],
     stampText: "PROVEN · CONFIRMED BY REAL EXPERIENCE · ",
   },
