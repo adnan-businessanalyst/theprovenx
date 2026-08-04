@@ -16,7 +16,9 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { HeroVisibilityContext } from "@/lib/hero-visibility";
+import { PageScrollNavContext } from "@/lib/page-scroll-nav";
 import { NavAuthGate } from "@/components/nav-auth";
+import { cn } from "@/lib/utils";
 
 const LANGUAGES = [
   { code: "en", label: "English" },
@@ -54,6 +56,27 @@ export default function Layout({ children }: { children: ReactNode }) {
   const askVisible = isHome ? heroVisible === false : true;
   const [bouncing, setBouncing] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const isProductsPage = pathname === "/products";
+  const isWhoWeArePage = pathname === "/who-we-are";
+  const usesScrollSwapNav = isProductsPage || isWhoWeArePage;
+  const [pageScrolled, setPageScrolled] = useState(false);
+  const pageScrollCtx = useMemo(
+    () => ({ scrolled: usesScrollSwapNav && pageScrolled }),
+    [usesScrollSwapNav, pageScrolled],
+  );
+
+  useEffect(() => {
+    if (!usesScrollSwapNav) {
+      setPageScrolled(false);
+      return;
+    }
+    const onScroll = () => {
+      setPageScrolled(window.scrollY > 40);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [usesScrollSwapNav]);
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -84,8 +107,21 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <HeroVisibilityContext.Provider value={heroCtx}>
-    <div className="min-h-[100dvh] flex flex-col font-sans bg-muted/20">
-      <div className="sticky top-4 z-50 w-full px-4">
+    <PageScrollNavContext.Provider value={pageScrollCtx}>
+    <div
+      className={cn(
+        "min-h-[100dvh] flex flex-col font-sans",
+        isWhoWeArePage ? "bg-transparent" : "bg-muted/20",
+      )}
+    >
+      <div
+        className={cn(
+          "sticky top-4 z-50 w-full px-4 transition-all duration-300",
+          usesScrollSwapNav && pageScrolled &&
+            "opacity-0 -translate-y-4 pointer-events-none h-0 overflow-hidden !px-0 m-0",
+        )}
+        aria-hidden={usesScrollSwapNav && pageScrolled}
+      >
         <header className="mx-auto max-w-6xl rounded-full border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-md transition-all">
           <div className="px-6 flex h-16 items-center gap-4">
             {/* Logo */}
@@ -188,30 +224,37 @@ export default function Layout({ children }: { children: ReactNode }) {
         </header>
       </div>
 
-      <main className="flex-1 container mx-auto max-w-6xl px-4 py-8">
-        {children}
-      </main>
+      {isWhoWeArePage ? (
+        <div className="flex-1">{children}</div>
+      ) : (
+        <main className="flex-1 container mx-auto max-w-6xl px-4 py-8">
+          {children}
+        </main>
+      )}
 
-      <footer className="border-t bg-card mt-auto">
-        <div className="container mx-auto max-w-6xl px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <img
-              src="/logo.png"
-              alt="The Proven X"
-              className="h-8 w-auto max-w-[140px] object-contain opacity-70"
-            />
-            <span>&copy; {new Date().getFullYear()} {t("footer.copyright")}</span>
+      {!isWhoWeArePage ? (
+        <footer className="border-t bg-card mt-auto">
+          <div className="container mx-auto max-w-6xl px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <img
+                src="/logo.png"
+                alt="The Proven X"
+                className="h-8 w-auto max-w-[140px] object-contain opacity-70"
+              />
+              <span>&copy; {new Date().getFullYear()} {t("footer.copyright")}</span>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <Link href="/tags" className="hover:text-foreground transition-colors">{t("nav.tags")}</Link>
+              <Link href="/contributors" className="hover:text-foreground transition-colors">{t("nav.contributors")}</Link>
+              <Link href="/" className="hover:text-foreground transition-colors">{t("footer.terms")}</Link>
+              <Link href="/" className="hover:text-foreground transition-colors">{t("footer.privacy")}</Link>
+              <Link href="/" className="hover:text-foreground transition-colors">{t("footer.help")}</Link>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/tags" className="hover:text-foreground transition-colors">{t("nav.tags")}</Link>
-            <Link href="/contributors" className="hover:text-foreground transition-colors">{t("nav.contributors")}</Link>
-            <Link href="/" className="hover:text-foreground transition-colors">{t("footer.terms")}</Link>
-            <Link href="/" className="hover:text-foreground transition-colors">{t("footer.privacy")}</Link>
-            <Link href="/" className="hover:text-foreground transition-colors">{t("footer.help")}</Link>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      ) : null}
     </div>
+    </PageScrollNavContext.Provider>
     </HeroVisibilityContext.Provider>
   );
 }

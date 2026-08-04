@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Gabarito, Instrument_Sans, Space_Mono } from "next/font/google";
+import Layout from "@/components/layout";
 import "@/styles/who-we-are.css";
 
 const gabarito = Gabarito({
@@ -25,10 +26,12 @@ const spaceMono = Space_Mono({
 
 export default function WhoWeAreLayout({ children }: { children: ReactNode }) {
   return (
-    <div
-      className={`wwa-page ${gabarito.variable} ${instrument.variable} ${spaceMono.variable}`}
-    >
-      {children}
-    </div>
+    <Layout>
+      <div
+        className={`wwa-page ${gabarito.variable} ${instrument.variable} ${spaceMono.variable}`}
+      >
+        {children}
+      </div>
+    </Layout>
   );
 }

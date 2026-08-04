@@ -4,7 +4,8 @@ import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
   title: "Products",
-  description: "Explore The Proven X products and community offerings.",
+  description:
+    "Website development and e-store packages from TheProvenX — Launch, Growth, and Scale tiers with clear limits for informative sites and online stores.",
   path: "/products",
 });
 

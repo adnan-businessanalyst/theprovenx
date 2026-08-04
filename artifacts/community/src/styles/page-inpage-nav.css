@@ -1,0 +1,31 @@
+/* In-page section nav that swaps with the site navbar on scroll (products / who-we-are) */
+.page-inpage-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 280ms ease, opacity 280ms ease;
+}
+
+.page-inpage-nav.is-visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* When used as a thin shell around .wwa-header on the products page */
+.page-inpage-nav.wwa-page {
+  min-height: 0;
+  background: transparent;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.page-inpage-nav .wwa-header {
+  position: relative;
+  top: auto;
+}

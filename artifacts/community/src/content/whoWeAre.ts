@@ -12,7 +12,7 @@ export const whoWeAre = {
   header: {
     brand: "TheProvenX",
     nav: [
-      { href: "#what-we-do", label: "What we do" },
+      { href: "#our-direction", label: "Our direction" },
       { href: "#what-makes-it-proven", label: "What makes it proven" },
       { href: "#whos-behind-it", label: "Who's behind it" },
       { href: "#our-proof", label: "Our proof" },
