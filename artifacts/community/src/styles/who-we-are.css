@@ -1,0 +1,916 @@
+.wwa-page {
+  --paper: #fff8f1;
+  --card: #ffffff;
+  --ink: #16233d;
+  --ink-soft: #54638a;
+  --orange: #ff6a13;
+  --orange-ink: #c74400;
+  --blue: #2456d6;
+  --blue-soft: #e7edff;
+  --yellow: #ffc733;
+  --peach: #ffe8d6;
+  --line: rgba(22, 35, 61, 0.13);
+  --wwa-shadow: 0 14px 34px -22px rgba(22, 35, 61, 0.34);
+  --font-display: var(--font-gabarito), system-ui, sans-serif;
+  --font-body: var(--font-instrument), system-ui, sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.65;
+  min-height: 100dvh;
+}
+
+.wwa-page .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.wwa-page *,
+.wwa-page *::before,
+.wwa-page *::after {
+  box-sizing: border-box;
+}
+
+.wwa-page a:focus-visible,
+.wwa-page button:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.wwa-container {
+  width: min(1120px, 92vw);
+  margin-inline: auto;
+}
+
+.wwa-section {
+  padding-block: clamp(46px, 6.5vw, 84px);
+  border-top: 1px solid var(--line);
+}
+
+.wwa-section--flush {
+  border-top: none;
+}
+
+.wwa-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--orange-ink);
+  margin: 0 0 1rem;
+}
+
+.wwa-eyebrow::before {
+  content: "";
+  width: 26px;
+  height: 2px;
+  background: var(--orange);
+  flex-shrink: 0;
+}
+
+.wwa-eyebrow--on-dark {
+  color: var(--yellow);
+}
+
+.wwa-eyebrow--on-dark::before {
+  background: var(--yellow);
+}
+
+.wwa-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6.4vw, 4.6rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin: 0 0 1.25rem;
+}
+
+.wwa-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  margin: 0 0 1rem;
+  color: var(--ink);
+}
+
+.wwa-h3 {
+  font-family: var(--font-display);
+  font-size: 1.32rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0 0 0.65rem;
+  color: var(--ink);
+}
+
+.wwa-lead {
+  font-size: clamp(1.05rem, 1.6vw, 1.22rem);
+  line-height: 1.65;
+  color: var(--ink-soft);
+  max-width: 56ch;
+  margin: 0 0 1.5rem;
+}
+
+.wwa-mono {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.wwa-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+
+.wwa-reveal.wwa-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+.wwa-card {
+  background: var(--card);
+  border-radius: 22px;
+  box-shadow: var(--wwa-shadow);
+  border: 1px solid var(--line);
+  transition: transform 200ms ease;
+}
+
+.wwa-card:hover {
+  transform: translateY(-2px);
+}
+
+.wwa-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--paper) 92%, white);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.wwa-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 64px;
+}
+
+.wwa-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.wwa-brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--orange);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 1.1rem;
+}
+
+.wwa-nav {
+  display: none;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.wwa-nav a {
+  text-decoration: none;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  font-weight: 500;
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.wwa-nav a:hover {
+  color: var(--ink);
+  border-bottom-color: var(--yellow);
+}
+
+@media (min-width: 900px) {
+  .wwa-nav {
+    display: flex;
+  }
+}
+
+.wwa-hero-grid {
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .wwa-hero-grid {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+}
+
+.wwa-stamp-wrap {
+  order: -1;
+  display: flex;
+  justify-content: center;
+}
+
+@media (min-width: 900px) {
+  .wwa-stamp-wrap {
+    order: 0;
+    justify-content: flex-end;
+  }
+}
+
+.wwa-line-ink {
+  color: var(--ink);
+}
+.wwa-line-orange {
+  color: var(--orange);
+}
+.wwa-line-blue {
+  color: var(--blue);
+}
+
+.wwa-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
+.wwa-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.wwa-chip span:first-child {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--orange-ink);
+}
+
+.wwa-two-col {
+  display: grid;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .wwa-two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.wwa-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.wwa-bullets li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  color: var(--ink);
+}
+
+.wwa-bullets li::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--yellow);
+  margin-top: 0.55rem;
+  flex-shrink: 0;
+}
+
+.wwa-scatter {
+  position: relative;
+  min-height: 280px;
+}
+
+.wwa-note {
+  position: absolute;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+  box-shadow: var(--wwa-shadow);
+  max-width: 180px;
+}
+
+.wwa-gather {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--blue);
+  color: white;
+  border-radius: 999px;
+  padding: 0.7rem 1.1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+  z-index: 2;
+  max-width: 90%;
+  box-shadow: var(--wwa-shadow);
+}
+
+.wwa-cards-3 {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 900px) {
+  .wwa-cards-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.wwa-service-card {
+  padding: 1.4rem;
+}
+
+.wwa-icon-tile {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1rem;
+}
+
+.wwa-icon-tile--peach {
+  background: var(--peach);
+  color: var(--orange-ink);
+}
+.wwa-icon-tile--blue {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.wwa-icon-tile--yellow {
+  background: #fff4cc;
+  color: #9a7400;
+}
+
+.wwa-tag {
+  display: inline-block;
+  margin-bottom: 0.65rem;
+  color: var(--ink-soft);
+}
+
+.wwa-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.wwa-list li {
+  position: relative;
+  padding-left: 1rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.wwa-list--orange li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--orange);
+}
+
+.wwa-list--blue li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--blue);
+}
+
+.wwa-product-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.wwa-product-tile {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 0.75rem;
+}
+
+.wwa-product-tile strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.wwa-product-tile span {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.wwa-proven-panel {
+  background: var(--ink);
+  color: white;
+  border-radius: clamp(22px, 3vw, 34px);
+  padding: clamp(30px, 4.6vw, 56px);
+}
+
+.wwa-proven-panel .wwa-h2 {
+  color: white;
+}
+
+.wwa-proven-panel .wwa-lead {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.wwa-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.wwa-steps li {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.wwa-steps li:last-child {
+  border-bottom: none;
+}
+
+.wwa-step-n {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--yellow);
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.wwa-step-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin: 0 0 0.3rem;
+}
+
+.wwa-step-body {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.95rem;
+}
+
+.wwa-demo {
+  background: white;
+  color: var(--ink);
+  border-radius: 20px;
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.wwa-demo-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  color: var(--ink-soft);
+}
+
+.wwa-demo-q {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin: 0 0 1rem;
+  line-height: 1.35;
+}
+
+.wwa-answer {
+  background: var(--paper);
+  border-radius: 14px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.wwa-answer-head {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.wwa-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--blue);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.wwa-byline strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.wwa-byline span {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.wwa-helpful {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  background: #e8f7ee;
+  color: #1a7a45;
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.wwa-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wwa-pips {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.wwa-pip {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: #e8eaf0;
+  display: grid;
+  place-items: center;
+  transition: background 200ms ease, transform 200ms ease;
+  color: transparent;
+  font-size: 0.7rem;
+}
+
+.wwa-pip.is-on {
+  background: var(--yellow);
+  transform: translateY(-2px);
+  color: var(--ink);
+}
+
+.wwa-confirm-btn {
+  appearance: none;
+  border: none;
+  background: var(--ink);
+  color: white;
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.wwa-confirm-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.wwa-counter {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+}
+
+.wwa-proven-stamp {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 110px;
+  height: 110px;
+  pointer-events: none;
+  opacity: 0;
+  transform: rotate(-22deg) scale(1.5);
+}
+
+.wwa-proven-stamp.is-shown {
+  animation: wwa-stamp-in 450ms cubic-bezier(0.2, 0.9, 0.3, 1.4) forwards;
+}
+
+@keyframes wwa-stamp-in {
+  to {
+    opacity: 1;
+    transform: rotate(-11deg) scale(1);
+  }
+}
+
+.wwa-q-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.wwa-q-card {
+  padding: 1.15rem;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.wwa-q-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--yellow);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  margin-bottom: 0.85rem;
+}
+
+.wwa-founder-tile {
+  width: clamp(120px, 15vw, 168px);
+  aspect-ratio: 1;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #ff6a13 0%, #ff9448 45%, #ffc733 100%);
+  display: grid;
+  place-items: center;
+  color: white;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  letter-spacing: -0.04em;
+}
+
+.wwa-quote {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.025em;
+  margin: 0 0 1.25rem;
+  position: relative;
+  padding-left: 0.15em;
+}
+
+.wwa-quote::before {
+  content: "“";
+  color: var(--orange);
+  font-size: 1.4em;
+  line-height: 0;
+  margin-right: 0.05em;
+}
+
+.wwa-quote::after {
+  content: "”";
+  color: var(--orange);
+}
+
+.wwa-attr {
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+}
+
+.wwa-attr span {
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.wwa-proof-grid {
+  display: grid;
+  gap: 0.85rem;
+  margin: 2rem 0 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.wwa-proof-slot {
+  border: 1.5px dashed var(--line);
+  border-radius: 16px;
+  padding: 1.1rem 0.9rem;
+  text-align: center;
+  background: transparent;
+}
+
+.wwa-proof-slot.is-filled {
+  border-style: solid;
+  background: var(--card);
+}
+
+.wwa-proof-value {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  color: rgba(22, 35, 61, 0.28);
+  line-height: 1;
+  margin-bottom: 0.45rem;
+}
+
+.wwa-proof-slot.is-filled .wwa-proof-value {
+  color: var(--ink);
+}
+
+.wwa-proof-label {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.wwa-info {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: var(--blue-soft);
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.wwa-direction-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.wwa-direction-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 1.15rem 1.2rem;
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  box-shadow: var(--wwa-shadow);
+}
+
+.wwa-direction-card:nth-child(1) {
+  border-left-color: var(--orange);
+}
+.wwa-direction-card:nth-child(2) {
+  border-left-color: var(--blue);
+}
+.wwa-direction-card:nth-child(3) {
+  border-left-color: var(--yellow);
+}
+.wwa-direction-card:nth-child(4) {
+  border-left-color: var(--ink);
+}
+
+.wwa-cta {
+  background: var(--orange);
+  color: white;
+  border-radius: clamp(22px, 3vw, 34px);
+  padding: clamp(36px, 5vw, 64px);
+  text-align: center;
+}
+
+.wwa-cta .wwa-h2 {
+  color: white;
+}
+
+.wwa-cta p {
+  max-width: 52ch;
+  margin: 0 auto 1.75rem;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: clamp(1.05rem, 1.5vw, 1.15rem);
+}
+
+.wwa-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.wwa-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.75rem 1.35rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.wwa-btn--solid {
+  background: white;
+  color: var(--orange-ink);
+}
+
+.wwa-btn--ghost {
+  background: transparent;
+  color: white;
+  border: 1.5px solid rgba(255, 255, 255, 0.65);
+}
+
+.wwa-footer {
+  border-top: 1px solid var(--line);
+  padding-block: 1.5rem;
+}
+
+.wwa-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  justify-content: space-between;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wwa-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .wwa-card,
+  .wwa-pip,
+  .wwa-nav a {
+    transition: none;
+  }
+
+  .wwa-proven-stamp.is-shown {
+    animation: none;
+    opacity: 1;
+    transform: rotate(-11deg) scale(1);
+  }
+
+  .wwa-stamp-spin {
+    animation: none !important;
+  }
+}

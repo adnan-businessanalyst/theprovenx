@@ -99,6 +99,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
             {/* Navigation Links */}
             <nav className="hidden md:flex items-center gap-1 text-sm font-medium text-muted-foreground mr-auto">
+              <Link href="/who-we-are" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.who_we_are")}</Link>
               <Link href="/about" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.about")}</Link>
               <Link href="/products" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.products")}</Link>
               <Link href="/blog" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.blog")}</Link>
@@ -172,6 +173,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 rounded-xl">
+                  <DropdownMenuItem onClick={() => setLocation('/who-we-are')} className="rounded-md">{t("nav.who_we_are")}</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setLocation('/about')} className="rounded-md">{t("nav.about")}</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setLocation('/products')} className="rounded-md">{t("nav.products")}</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setLocation('/blog')} className="rounded-md">{t("nav.blog")}</DropdownMenuItem>
