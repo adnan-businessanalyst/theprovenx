@@ -8,7 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingScreen } from "@/components/ui/spinner";
 import { Bell, Inbox, Check } from "lucide-react";
 
 export default function Notifications() {
@@ -27,7 +27,7 @@ export default function Notifications() {
   const markRead = useMarkNotificationsRead();
 
   if (meLoading || notifLoading) {
-    return <div className="p-8 max-w-3xl mx-auto"><Skeleton className="h-96 w-full rounded-2xl" /></div>;
+    return <LoadingScreen />;
   }
 
   if (!me) {

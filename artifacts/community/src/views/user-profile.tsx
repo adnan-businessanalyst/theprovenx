@@ -6,8 +6,8 @@ import { formatDistanceToNow } from "date-fns";
 import { useGetUserProfile, getGetUserProfileQueryKey } from "@workspace/api-client-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LoadingScreen } from "@/components/ui/spinner";
 import { CalendarDays, TrendingUp, MessageSquare, HelpCircle, CheckCircle2, ShieldAlert } from "lucide-react";
 import QuestionCard from "@/components/question-card";
 
@@ -19,18 +19,7 @@ export default function UserProfile({ username }: { username: string }) {
   });
 
   if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto space-y-8 animate-pulse">
-        <div className="flex flex-col sm:flex-row gap-6 p-8 border rounded-3xl bg-card">
-          <Skeleton className="h-32 w-32 rounded-full" />
-          <div className="flex-1 space-y-4 pt-2">
-            <Skeleton className="h-8 w-1/3" />
-            <Skeleton className="h-4 w-1/4" />
-            <Skeleton className="h-20 w-full mt-4" />
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!profile) {

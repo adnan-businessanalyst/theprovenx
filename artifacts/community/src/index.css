@@ -209,6 +209,22 @@
   }
 }
 
+@keyframes proven-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-proven-spin {
+  animation: proven-spin 1.35s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-proven-spin {
+    animation: none;
+  }
+}
+
 @keyframes ask-bounce {
   0% { transform: translateY(-14px) scale(0.9); opacity: 0.5; }
   40% { transform: translateY(4px) scale(1.05); opacity: 1; }

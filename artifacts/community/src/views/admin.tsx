@@ -26,7 +26,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingScreen } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import { ShieldAlert, Users, Flag, Activity, CreditCard, Ban, Trash2, Edit2, Plus, Grid2X2, Layers, Megaphone, Mail } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -73,7 +73,7 @@ export default function Admin() {
   const updateSponsorInquiry = useUpdateSponsorInquiryAdmin();
 
   if (meLoading || overviewLoading) {
-    return <div className="p-8"><Skeleton className="h-64 w-full rounded-2xl" /></div>;
+    return <LoadingScreen />;
   }
 
   if (!me || (me.role !== 'admin' && me.role !== 'platform_owner')) {

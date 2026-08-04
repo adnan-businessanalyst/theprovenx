@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingScreen } from "@/components/ui/spinner";
 import { Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -49,7 +49,7 @@ export default function Settings() {
   }, [me, form]);
 
   if (isLoading) {
-    return <div className="p-8 max-w-2xl mx-auto"><Skeleton className="h-96 w-full rounded-2xl" /></div>;
+    return <LoadingScreen />;
   }
 
   if (!me) {
