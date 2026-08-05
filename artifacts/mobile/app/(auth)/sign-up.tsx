@@ -5,11 +5,12 @@ import {
   Text,
   TextInput,
   View,
+  Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { type Href, Link, useRouter } from 'expo-router';
-import { ApiError } from '@workspace/api-client-react';
+import { ApiError, updateMe } from '@workspace/api-client-react';
 import { useAuth } from '@/lib/auth';
 import { useColors } from '@/hooks/useColors';
 import { BrandText, PillButton, fonts } from '@/components/ui';
@@ -29,17 +30,23 @@ function suggestUsernameFrom(email: string, alias: string): string {
   return sanitizeUsername(source);
 }
 
+const BIO_MAX = 1000;
+
+type SignUpStep = 'account' | 'bio';
+
 export default function SignUpScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { signUp, isSignedIn } = useAuth();
 
+  const [step, setStep] = useState<SignUpStep>('account');
   const [emailAddress, setEmailAddress] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [aliasName, setAliasName] = useState('');
   const [usernameTouched, setUsernameTouched] = useState(false);
+  const [bio, setBio] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -48,7 +55,12 @@ export default function SignUpScreen() {
     setUsername(suggestUsernameFrom(nextEmail, nextAlias));
   };
 
-  const handleSubmit = async () => {
+  const finishOnboarding = () => {
+    router.dismissAll();
+    router.replace('/' as Href);
+  };
+
+  const handleSubmitAccount = async () => {
     setError(null);
     const handle = sanitizeUsername(username);
     const alias = aliasName.trim();
@@ -68,13 +80,36 @@ export default function SignUpScreen() {
         username: handle,
         displayName: alias,
       });
-      router.dismissAll();
-      router.replace('/' as Href);
+      setStep('bio');
     } catch (err) {
       setError(
         err instanceof ApiError
           ? err.message.replace(/^HTTP \d+ [^:]+:\s*/, '')
           : 'Could not create account. Please try again.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveBio = async () => {
+    setError(null);
+    const trimmed = bio.trim();
+    if (trimmed.length > BIO_MAX) {
+      setError(`Bio must be at most ${BIO_MAX} characters.`);
+      return;
+    }
+    setLoading(true);
+    try {
+      if (trimmed) {
+        await updateMe({ bio: trimmed });
+      }
+      finishOnboarding();
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message.replace(/^HTTP \d+ [^:]+:\s*/, '')
+          : 'Could not save bio. Please try again.',
       );
     } finally {
       setLoading(false);
@@ -91,7 +126,89 @@ export default function SignUpScreen() {
     },
   ];
 
-  if (isSignedIn) return null;
+  if (isSignedIn && step === 'account') return null;
+
+  if (step === 'bio') {
+    return (
+      <KeyboardAwareScrollView
+        style={{ backgroundColor: colors.background }}
+        contentContainerStyle={[styles.container, { paddingBottom: insets.bottom + 48 }]}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={24}
+      >
+        <Text
+          style={{
+            color: colors.mutedForeground,
+            fontFamily: fonts.medium,
+            fontSize: 12,
+            textAlign: 'center',
+            textTransform: 'uppercase',
+            letterSpacing: 1,
+          }}
+        >
+          Step 2 of 2
+        </Text>
+        <BrandText weight="extrabold" style={{ fontSize: 24, textAlign: 'center' }}>
+          Add a short bio
+        </BrandText>
+        <Text
+          style={{
+            color: colors.mutedForeground,
+            fontFamily: fonts.regular,
+            fontSize: 14,
+            textAlign: 'center',
+          }}
+        >
+          Optional — you can skip and add this later in settings.
+        </Text>
+
+        <TextInput
+          testID="input-bio"
+          style={[inputStyle, styles.bioInput]}
+          value={bio}
+          placeholder="Tell the community a bit about yourself"
+          placeholderTextColor={colors.mutedForeground}
+          onChangeText={setBio}
+          multiline
+          maxLength={BIO_MAX}
+        />
+        <Text
+          style={{
+            color: colors.mutedForeground,
+            fontFamily: fonts.regular,
+            fontSize: 12,
+            textAlign: 'right',
+          }}
+        >
+          {bio.trim().length}/{BIO_MAX}
+        </Text>
+
+        {error ? (
+          <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text>
+        ) : null}
+
+        <PillButton
+          label={bio.trim() ? 'Save and continue' : 'Continue'}
+          testID="button-save-bio"
+          loading={loading}
+          onPress={handleSaveBio}
+        />
+        <Pressable onPress={finishOnboarding} disabled={loading} testID="button-skip-bio">
+          <Text
+            style={{
+              color: colors.mutedForeground,
+              fontFamily: fonts.semibold,
+              fontSize: 14,
+              textAlign: 'center',
+              paddingVertical: 8,
+            }}
+          >
+            Skip for now
+          </Text>
+        </Pressable>
+      </KeyboardAwareScrollView>
+    );
+  }
 
   return (
     <KeyboardAwareScrollView
@@ -100,11 +217,23 @@ export default function SignUpScreen() {
       keyboardShouldPersistTaps="handled"
       bottomOffset={24}
     >
+      <Text
+        style={{
+          color: colors.mutedForeground,
+          fontFamily: fonts.medium,
+          fontSize: 12,
+          textAlign: 'center',
+          textTransform: 'uppercase',
+          letterSpacing: 1,
+        }}
+      >
+        Step 1 of 2
+      </Text>
       <BrandText weight="extrabold" style={{ fontSize: 24, textAlign: 'center' }}>
         Create account
       </BrandText>
       <Text style={{ color: colors.mutedForeground, fontFamily: fonts.regular, fontSize: 14, textAlign: 'center' }}>
-        Join The Proven X community
+        Join The Proven X community — bio comes next
       </Text>
 
       <View style={styles.field}>
@@ -189,7 +318,7 @@ export default function SignUpScreen() {
         testID="button-sign-up"
         disabled={!emailAddress || !password || !username || !aliasName.trim()}
         loading={loading}
-        onPress={handleSubmit}
+        onPress={handleSubmitAccount}
       />
 
       <View style={styles.linkRow}>
@@ -227,6 +356,10 @@ const styles = StyleSheet.create({
   },
   usernameInput: {
     flex: 1,
+  },
+  bioInput: {
+    minHeight: 120,
+    textAlignVertical: 'top',
   },
   input: {
     borderWidth: 1,
