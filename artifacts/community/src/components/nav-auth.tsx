@@ -18,6 +18,7 @@ import {
   User as UserIcon,
   ShieldAlert,
   Inbox,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -193,6 +194,12 @@ export function NavAuth() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => setLocation("/board")}
+            className="cursor-pointer rounded-md"
+          >
+            <ClipboardList className="mr-2 h-4 w-4" /> My board
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setLocation(`/users/${me.username}`)}
             className="cursor-pointer rounded-md"

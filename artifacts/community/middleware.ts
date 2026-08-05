@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 const SESSION_COOKIE = "tp_session";
 
-const protectedPrefixes = ["/admin", "/profile", "/notifications", "/ask"];
+const protectedPrefixes = ["/admin", "/profile", "/notifications", "/ask", "/board"];
 
 function isProtectedPath(pathname: string): boolean {
   return protectedPrefixes.some(
