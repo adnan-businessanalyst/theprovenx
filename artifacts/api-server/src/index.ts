@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { ensureDefaultCategories } from "./lib/ensureDefaults";
+import { initMailer } from "./lib/mailer";
 
 const rawPort = process.env["PORT"];
 
@@ -18,6 +19,7 @@ if (Number.isNaN(port) || port <= 0) {
 
 async function start() {
   try {
+    initMailer();
     await ensureDefaultCategories();
   } catch (err) {
     logger.error({ err }, "Failed to provision defaults / schema");
