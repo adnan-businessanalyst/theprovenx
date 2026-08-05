@@ -16,13 +16,23 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, HelpCircle, LayoutGrid } from "lucide-react";
 
-const formSchema = z.object({
-  title: z.string().min(10, "Title must be at least 10 characters.").max(200, "Title too long."),
-  body: z.string().min(20, "Body must be at least 20 characters.").max(30000, "Body too long."),
-  tags: z.array(z.string()).max(1, "Only one optional tag is allowed."),
-  categorySlug: z.string().min(1, "Please select a category."),
-  website: z.string().max(0, "Honeypot must be empty").optional(),
-});
+const formSchema = z
+  .object({
+    title: z.string().min(10, "Title must be at least 10 characters.").max(200, "Title too long."),
+    body: z.string().min(20, "Body must be at least 20 characters.").max(30000, "Body too long."),
+    tags: z.array(z.string()).max(1, "Only one tag is allowed."),
+    categorySlug: z.string().min(1, "Please select a category."),
+    website: z.string().max(0, "Honeypot must be empty").optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.categorySlug === "other" && data.tags.length < 1) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "A tag is required for the Other category.",
+        path: ["tags"],
+      });
+    }
+  });
 
 export default function AskQuestion() {
   const { t } = useTranslation();
@@ -46,19 +56,18 @@ export default function AskQuestion() {
   });
 
   const categorySlug = form.watch("categorySlug");
-  const showOptionalTag = categorySlug === "other";
+  const isOtherCategory = categorySlug === "other";
+  const showTags = Boolean(categorySlug);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (values.website) return;
-
-    const tags = values.categorySlug === "other" ? values.tags.slice(0, 1) : [];
 
     createQuestion.mutate(
       {
         data: {
           title: values.title,
           body: values.body,
-          tags,
+          tags: values.tags.slice(0, 1),
           categorySlug: values.categorySlug,
           website: values.website,
           language: window.document.documentElement.lang || "en",
@@ -96,7 +105,7 @@ export default function AskQuestion() {
         toast({
           variant: "destructive",
           title: "Limit reached",
-          description: "You can add at most one optional tag.",
+          description: "You can add at most one tag.",
         });
         return;
       }
@@ -174,10 +183,7 @@ export default function AskQuestion() {
                     <Select
                       onValueChange={(value) => {
                         field.onChange(value);
-                        if (value !== "other") {
-                          form.setValue("tags", [], { shouldValidate: true });
-                          setTagInput("");
-                        }
+                        form.trigger("tags");
                       }}
                       value={field.value}
                     >
@@ -203,17 +209,24 @@ export default function AskQuestion() {
                 )}
               />
 
-              {showOptionalTag ? (
+              {showTags ? (
                 <FormField
                   control={form.control}
                   name="tags"
                   render={() => (
                     <FormItem>
                       <FormLabel className="text-base font-semibold">
-                        {t("question.tags_label")} (optional)
+                        {t("question.tags_label")}{" "}
+                        {isOtherCategory ? (
+                          <span className="text-destructive font-normal">(required)</span>
+                        ) : (
+                          <span className="text-muted-foreground font-normal">(optional)</span>
+                        )}
                       </FormLabel>
                       <FormDescription>
-                        Optionally add one tag for this Other topic (press Enter).
+                        {isOtherCategory
+                          ? "Add one tag that describes this Other topic (press Enter)."
+                          : "Optionally add one tag to help others find your question (press Enter)."}
                       </FormDescription>
                       <FormControl>
                         <Input

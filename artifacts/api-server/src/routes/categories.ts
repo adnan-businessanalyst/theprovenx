@@ -16,7 +16,12 @@ router.get("/categories", async (_req, res): Promise<void> => {
     .from(categoriesTable)
     .leftJoin(questionsTable, eq(questionsTable.categoryId, categoriesTable.id))
     .groupBy(categoriesTable.id)
-    .orderBy(desc(sql`count(${questionsTable.id})`), categoriesTable.name);
+    .orderBy(
+      desc(
+        sql`count(${questionsTable.id}) filter (where ${questionsTable.isDeleted} = false and ${questionsTable.status} = 'published')`,
+      ),
+      categoriesTable.name,
+    );
   res.json(rows);
 });
 

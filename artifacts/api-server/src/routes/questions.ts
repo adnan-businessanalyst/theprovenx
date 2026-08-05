@@ -183,6 +183,12 @@ router.post("/questions", requireAuth, askLimiter, async (req, res): Promise<voi
     return;
   }
 
+  const rawTags = (parsed.data.tags ?? []).slice(0, 1);
+  if (categoryRow.slug === "other" && rawTags.length < 1) {
+    res.status(400).json({ message: "A tag is required for the Other category" });
+    return;
+  }
+
   const settings = await getSiteSettings();
   const status = settings.questionsRequireReview ? "pending_review" : "published";
 
@@ -199,8 +205,6 @@ router.post("/questions", requireAuth, askLimiter, async (req, res): Promise<voi
     })
     .returning();
 
-  const rawTags =
-    categoryRow.slug === "other" ? (parsed.data.tags ?? []).slice(0, 1) : [];
   const tagIds = await ensureTags(rawTags);
   if (tagIds.length > 0) {
     await db

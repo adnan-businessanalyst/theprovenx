@@ -33,7 +33,8 @@ export default function AskScreen() {
 
   const categoriesQuery = useListCategories();
   const tagsQuery = useListTags();
-  const showOptionalTag = categorySlug === 'other';
+  const isOtherCategory = categorySlug === 'other';
+  const showTags = Boolean(categorySlug);
 
   const createQuestion = useCreateQuestion({
     mutation: {
@@ -61,13 +62,13 @@ export default function AskScreen() {
 
   const selectCategory = (slug: string) => {
     setCategorySlug(slug);
-    if (slug !== 'other') setTags([]);
   };
 
   const valid =
     title.trim().length >= 10 &&
     body.trim().length >= 20 &&
-    !!categorySlug;
+    !!categorySlug &&
+    (!isOtherCategory || tags.length >= 1);
 
   const submit = () => {
     if (!valid || !categorySlug) return;
@@ -76,7 +77,7 @@ export default function AskScreen() {
       data: {
         title: title.trim(),
         body: body.trim(),
-        tags: categorySlug === 'other' ? tags.slice(0, 1) : [],
+        tags: tags.slice(0, 1),
         categorySlug,
       },
     });
@@ -145,18 +146,18 @@ export default function AskScreen() {
         </View>
       </View>
 
-      {showOptionalTag ? (
+      {showTags ? (
         <View style={styles.field}>
           <BrandText weight="semibold" style={{ fontSize: 14 }}>
             Tag{' '}
             <Text
               style={{
-                color: colors.mutedForeground,
+                color: isOtherCategory ? colors.destructive : colors.mutedForeground,
                 fontFamily: fonts.regular,
                 fontSize: 12,
               }}
             >
-              (optional — pick one)
+              {isOtherCategory ? '(required — pick one)' : '(optional — pick one)'}
             </Text>
           </BrandText>
           <View style={styles.chipWrap}>

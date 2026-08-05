@@ -18,7 +18,7 @@ export interface QuestionInput {
      */
   body: string;
   /**
-     * Optional; only used when categorySlug is "other"
+     * Optional for most categories; required (exactly one) when categorySlug is "other"
      * @minItems 0
      * @maxItems 1
      */
