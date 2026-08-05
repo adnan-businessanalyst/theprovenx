@@ -43,8 +43,13 @@ export function TopQuestions({
 }: TopQuestionsProps) {
   const { t } = useTranslation();
 
+  const showFeaturedSlot = page === 1 && !tag && !category;
+
   const { data: featured } = useListFeaturedQuestions({
-    query: { queryKey: getListFeaturedQuestionsQueryKey() },
+    query: {
+      queryKey: getListFeaturedQuestionsQueryKey(),
+      enabled: showFeaturedSlot,
+    },
   });
 
   const { data: questions, isLoading } = useListQuestions(
@@ -62,8 +67,7 @@ export function TopQuestions({
     },
   );
 
-  const showFeatured =
-    page === 1 && !tag && !category && featured && featured.length > 0;
+  const showFeatured = showFeaturedSlot && !!featured?.length;
 
   const title = category
     ? `${t("home.category_prefix")}${categoryLabel ?? category}`
