@@ -73,12 +73,6 @@ export function NavAuth() {
     return () => evtSource.close();
   }, [me, queryClient]);
 
-  if (!isLoaded) {
-    return (
-      <div className="h-9 w-20 animate-pulse rounded-full bg-muted/60" aria-hidden />
-    );
-  }
-
   if (!isSignedIn) {
     return (
       <Link
@@ -90,7 +84,8 @@ export function NavAuth() {
     );
   }
 
-  if (!me) {
+  // Signed in — wait for profile payload (or auth user fallback) before icons.
+  if (!isLoaded || !me) {
     return (
       <div className="h-9 w-20 animate-pulse rounded-full bg-muted/60" aria-hidden />
     );

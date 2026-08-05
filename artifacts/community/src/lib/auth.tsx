@@ -64,6 +64,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [meQuery.isFetching, meQuery.isSuccess, meQuery.isError]);
 
+  // If auth/me never settles (slow/broken proxy), still treat the session as loaded
+  // so the navbar can show Sign In instead of an endless skeleton.
+  useEffect(() => {
+    if (bootstrapped) return;
+    const tid = window.setTimeout(() => setBootstrapped(true), 4000);
+    return () => window.clearTimeout(tid);
+  }, [bootstrapped]);
+
   // Drop the override once the network query matches the intended session.
   useEffect(() => {
     if (sessionUser === undefined || meQuery.isFetching) return;
@@ -100,6 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearAuthUser = useCallback(() => {
     queryClient.setQueryData(getGetAuthMeQueryKey(), null);
     queryClient.setQueryData(getGetMeQueryKey(), null);
+    // Prefer error/empty settled state over "success with null" for signed-out.
+    void queryClient.invalidateQueries({ queryKey: getGetAuthMeQueryKey() });
     setSessionUser(null);
     setBootstrapped(true);
   }, [queryClient]);

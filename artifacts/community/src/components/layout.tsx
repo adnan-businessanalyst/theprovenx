@@ -216,6 +216,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                   <DropdownMenuItem onClick={() => setLocation('/contributors')} className="rounded-md">{t("nav.contributors")}</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSearchOpen(true)} className="rounded-md">{t("nav.search")}</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setLocation('/ask')} className="font-bold text-primary rounded-md">{t("nav.ask")}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setLocation('/sign-in')} className="rounded-md">{t("nav.sign_in")}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
