@@ -1271,8 +1271,8 @@ components:
           type: array
           items: { type: string }
           minItems: 0
-          maxItems: 1
-          description: Optional for most categories; required (exactly one) when categorySlug is "other"
+          maxItems: 5
+          description: Optional for most categories; at least one required when categorySlug is "other" (max 5)
         categorySlug: { type: string, minLength: 1 }
         language: { type: string }
         website: { type: string, description: "Honeypot field - must be empty" }

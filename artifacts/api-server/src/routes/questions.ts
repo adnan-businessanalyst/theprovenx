@@ -183,9 +183,9 @@ router.post("/questions", requireAuth, askLimiter, async (req, res): Promise<voi
     return;
   }
 
-  const rawTags = (parsed.data.tags ?? []).slice(0, 1);
+  const rawTags = (parsed.data.tags ?? []).slice(0, 5);
   if (categoryRow.slug === "other" && rawTags.length < 1) {
-    res.status(400).json({ message: "A tag is required for the Other category" });
+    res.status(400).json({ message: "At least one tag is required for the Other category" });
     return;
   }
 

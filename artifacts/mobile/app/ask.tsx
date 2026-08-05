@@ -56,7 +56,8 @@ export default function AskScreen() {
   const toggleTag = (slug: string) => {
     setTags((prev) => {
       if (prev.includes(slug)) return prev.filter((t) => t !== slug);
-      return [slug];
+      if (prev.length >= 5) return prev;
+      return [...prev, slug];
     });
   };
 
@@ -77,7 +78,7 @@ export default function AskScreen() {
       data: {
         title: title.trim(),
         body: body.trim(),
-        tags: tags.slice(0, 1),
+        tags: tags.slice(0, 5),
         categorySlug,
       },
     });
@@ -157,7 +158,7 @@ export default function AskScreen() {
                 fontSize: 12,
               }}
             >
-              {isOtherCategory ? '(required — pick one)' : '(optional — pick one)'}
+              {isOtherCategory ? '(required — pick at least one)' : '(optional — up to 5)'}
             </Text>
           </BrandText>
           <View style={styles.chipWrap}>

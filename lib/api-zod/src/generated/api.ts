@@ -444,7 +444,7 @@ export const createQuestionBodyBodyMin = 20;
 export const createQuestionBodyBodyMax = 30000;
 
 export const createQuestionBodyTagsMin = 0;
-export const createQuestionBodyTagsMax = 1;
+export const createQuestionBodyTagsMax = 5;
 
 
 
@@ -452,7 +452,7 @@ export const createQuestionBodyTagsMax = 1;
 export const CreateQuestionBody = zod.object({
   "title": zod.string().min(createQuestionBodyTitleMin).max(createQuestionBodyTitleMax),
   "body": zod.string().min(createQuestionBodyBodyMin).max(createQuestionBodyBodyMax),
-  "tags": zod.array(zod.string()).min(createQuestionBodyTagsMin).max(createQuestionBodyTagsMax).optional().describe('Optional for most categories; required (exactly one) when categorySlug is \"other\"'),
+  "tags": zod.array(zod.string()).min(createQuestionBodyTagsMin).max(createQuestionBodyTagsMax).optional().describe('Optional for most categories; at least one required when categorySlug is \"other\" (max 5)'),
   "categorySlug": zod.string().min(1),
   "language": zod.string().optional(),
   "website": zod.string().optional().describe('Honeypot field - must be empty')

@@ -277,9 +277,9 @@ export interface QuestionInput {
      */
   body: string;
   /**
-     * Optional for most categories; required (exactly one) when categorySlug is "other"
+     * Optional for most categories; at least one required when categorySlug is "other" (max 5)
      * @minItems 0
-     * @maxItems 1
+     * @maxItems 5
      */
   tags?: string[];
   /** @minLength 1 */

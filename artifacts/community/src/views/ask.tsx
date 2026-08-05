@@ -14,13 +14,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, HelpCircle, LayoutGrid } from "lucide-react";
+import { X, HelpCircle, LayoutGrid, Plus } from "lucide-react";
+
+const MAX_TAGS = 5;
 
 const formSchema = z
   .object({
     title: z.string().min(10, "Title must be at least 10 characters.").max(200, "Title too long."),
     body: z.string().min(20, "Body must be at least 20 characters.").max(30000, "Body too long."),
-    tags: z.array(z.string()).max(1, "Only one tag is allowed."),
+    tags: z.array(z.string()).max(MAX_TAGS, `You can add at most ${MAX_TAGS} tags.`),
     categorySlug: z.string().min(1, "Please select a category."),
     website: z.string().max(0, "Honeypot must be empty").optional(),
   })
@@ -28,7 +30,7 @@ const formSchema = z
     if (data.categorySlug === "other" && data.tags.length < 1) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "A tag is required for the Other category.",
+        message: "At least one tag is required for the Other category.",
         path: ["tags"],
       });
     }
@@ -67,7 +69,7 @@ export default function AskQuestion() {
         data: {
           title: values.title,
           body: values.body,
-          tags: values.tags.slice(0, 1),
+          tags: values.tags.slice(0, MAX_TAGS),
           categorySlug: values.categorySlug,
           website: values.website,
           language: window.document.documentElement.lang || "en",
@@ -95,24 +97,43 @@ export default function AskQuestion() {
     );
   };
 
-  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
+  const addTagsFromInput = () => {
+    const parts = tagInput
+      .split(",")
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+    if (parts.length === 0) return;
+
+    const currentTags = form.getValues("tags");
+    const next = [...currentTags];
+    let skipped = 0;
+
+    for (const part of parts) {
+      if (next.length >= MAX_TAGS) {
+        skipped += 1;
+        continue;
+      }
+      if (!next.includes(part)) {
+        next.push(part);
+      }
+    }
+
+    form.setValue("tags", next, { shouldValidate: true });
+    setTagInput("");
+
+    if (skipped > 0 || (currentTags.length >= MAX_TAGS && parts.length > 0)) {
+      toast({
+        variant: "destructive",
+        title: "Limit reached",
+        description: `You can add at most ${MAX_TAGS} tags.`,
+      });
+    }
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
       e.preventDefault();
-      const newTag = tagInput.trim().toLowerCase();
-      if (!newTag) return;
-      const currentTags = form.getValues("tags");
-      if (currentTags.length >= 1) {
-        toast({
-          variant: "destructive",
-          title: "Limit reached",
-          description: "You can add at most one tag.",
-        });
-        return;
-      }
-      if (!currentTags.includes(newTag)) {
-        form.setValue("tags", [newTag], { shouldValidate: true });
-        setTagInput("");
-      }
+      addTagsFromInput();
     }
   };
 
@@ -225,19 +246,33 @@ export default function AskQuestion() {
                       </FormLabel>
                       <FormDescription>
                         {isOtherCategory
-                          ? "Add one tag that describes this Other topic (press Enter)."
-                          : "Optionally add one tag to help others find your question (press Enter)."}
+                          ? `Add at least one tag for this Other topic (up to ${MAX_TAGS}). Separate multiple tags with commas, then press Enter or Add.`
+                          : `Optionally add up to ${MAX_TAGS} tags. Separate them with commas, then press Enter or Add.`}
                       </FormDescription>
-                      <FormControl>
-                        <Input
-                          value={tagInput}
-                          onChange={(e) => setTagInput(e.target.value)}
-                          onKeyDown={handleAddTag}
-                          placeholder="e.g. housing..."
-                          className="h-12 rounded-xl"
-                          disabled={form.watch("tags").length >= 1}
-                        />
-                      </FormControl>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input
+                            value={tagInput}
+                            onChange={(e) => setTagInput(e.target.value)}
+                            onKeyDown={handleTagKeyDown}
+                            placeholder="e.g. housing, visa, renew..."
+                            className="h-12 rounded-xl"
+                            disabled={form.watch("tags").length >= MAX_TAGS}
+                          />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="h-12 shrink-0 rounded-xl px-4"
+                          onClick={addTagsFromInput}
+                          disabled={
+                            !tagInput.trim() || form.watch("tags").length >= MAX_TAGS
+                          }
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add
+                        </Button>
+                      </div>
                       <div className="flex flex-wrap gap-2 mt-3">
                         {form.watch("tags").map((tag) => (
                           <Badge
