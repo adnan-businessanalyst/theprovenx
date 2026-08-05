@@ -92,7 +92,10 @@ export default function Settings() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base">{t('profile.display_name')}</FormLabel>
-                    <FormDescription>Your name as it appears across the site.</FormDescription>
+                    <FormDescription>
+                      How your name appears in the community. It does not have to be unique and may
+                      include spaces.
+                    </FormDescription>
                     <FormControl>
                       <Input className="text-base h-12" {...field} />
                     </FormControl>

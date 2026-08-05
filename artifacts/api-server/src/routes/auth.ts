@@ -42,8 +42,9 @@ function isValidEmail(email: string): boolean {
 function slugifyUsername(input: string): string {
   const base = input
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
+    .replace(/\s+/g, "")
+    .replace(/[^a-z0-9_-]+/g, "")
+    .replace(/^[_-]+|[_-]+$/g, "")
     .slice(0, 30);
   return base || "member";
 }
@@ -88,7 +89,17 @@ router.post("/auth/register", authLimiter, async (req, res): Promise<void> => {
   }
 
   const desiredUsername = slugifyUsername(username);
+  if (desiredUsername.length < 3) {
+    res.status(400).json({
+      message: "Username must be at least 3 characters (letters, numbers, _ or -; no spaces).",
+    });
+    return;
+  }
   const name = displayName.trim();
+  if (!name) {
+    res.status(400).json({ message: "Alias name is required." });
+    return;
+  }
 
   const [existingEmail] = await db
     .select({ id: usersTable.id })

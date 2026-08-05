@@ -21,6 +21,21 @@ function formatAuthError(err: unknown, fallback: string): string {
   return message.replace(/^HTTP \d+ [^:]+:\s*/, "");
 }
 
+/** Lowercase handle with no spaces — letters, numbers, underscore, hyphen only. */
+export function sanitizeUsername(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[^a-z0-9_-]/g, "")
+    .slice(0, 30);
+}
+
+function suggestUsernameFrom(email: string, alias: string): string {
+  const local = email.includes("@") ? email.split("@")[0] ?? "" : email;
+  const source = local.trim() || alias.trim();
+  return sanitizeUsername(source);
+}
+
 export function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -30,9 +45,15 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
-  const [displayName, setDisplayName] = useState("");
+  const [aliasName, setAliasName] = useState("");
+  const [usernameTouched, setUsernameTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  function syncUsernameSuggestion(nextEmail: string, nextAlias: string) {
+    if (usernameTouched) return;
+    setUsername(suggestUsernameFrom(nextEmail, nextAlias));
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -42,11 +63,23 @@ export function AuthForm({ mode }: { mode: Mode }) {
       if (mode === "sign-in") {
         await signIn(email, password);
       } else {
+        const handle = sanitizeUsername(username);
+        if (handle.length < 3) {
+          setError("Username must be at least 3 characters (letters, numbers, _ or -).");
+          setLoading(false);
+          return;
+        }
+        const alias = aliasName.trim();
+        if (!alias) {
+          setError("Alias name is required.");
+          setLoading(false);
+          return;
+        }
         await signUp({
           email,
           password,
-          username,
-          displayName: displayName || username,
+          username: handle,
+          displayName: alias,
         });
       }
       router.replace(redirect.startsWith("/") ? redirect : "/");
@@ -79,45 +112,87 @@ export function AuthForm({ mode }: { mode: Mode }) {
         {mode === "sign-up" && (
           <>
             <div className="space-y-2">
-              <Label htmlFor="displayName">Display name</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="displayName"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                autoComplete="name"
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setEmail(next);
+                  syncUsernameSuggestion(next, aliasName);
+                }}
+                autoComplete="email"
                 required
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="aliasName">Alias name</Label>
               <Input
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                autoComplete="username"
-                minLength={3}
-                maxLength={30}
+                id="aliasName"
+                value={aliasName}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setAliasName(next);
+                  syncUsernameSuggestion(email, next);
+                }}
+                autoComplete="nickname"
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                How your name appears in the community. It does not have to be unique and may
+                include spaces.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <div className="relative">
+                <span
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden
+                >
+                  @
+                </span>
+                <Input
+                  id="username"
+                  value={username}
+                  onChange={(e) => {
+                    setUsernameTouched(true);
+                    setUsername(sanitizeUsername(e.target.value));
+                  }}
+                  autoComplete="username"
+                  minLength={3}
+                  maxLength={30}
+                  className="pl-7"
+                  required
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Your unique handle for your profile link and mentions. No spaces — only letters,
+                numbers, underscores, and hyphens. Suggested from your email (or alias); you can
+                edit it.
+              </p>
             </div>
           </>
         )}
-        <div className="space-y-2">
-          <Label htmlFor="email">
-            {mode === "sign-in"
-              ? "Email (adnan.akhonbay@gmail.com)"
-              : "Email"}
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            placeholder={mode === "sign-in" ? "adnan.akhonbay@gmail.com" : undefined}
-            required
-          />
-        </div>
+
+        {mode === "sign-in" && (
+          <div className="space-y-2">
+            <Label htmlFor="email">Email (adnan.akhonbay@gmail.com)</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              placeholder="adnan.akhonbay@gmail.com"
+              required
+            />
+          </div>
+        )}
+
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">

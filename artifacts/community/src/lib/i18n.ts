@@ -96,7 +96,7 @@ const resources = {
         "activity": "Recent Activity",
         "edit": "Edit Profile",
         "save": "Save Changes",
-        "display_name": "Display Name",
+        "display_name": "Alias name",
         "bio": "Bio",
         "questions": "Questions",
         "answers": "Answers"
@@ -293,7 +293,7 @@ const resources = {
         "activity": "النشاط الأخير",
         "edit": "تعديل الملف",
         "save": "حفظ التغييرات",
-        "display_name": "الاسم",
+        "display_name": "الاسم المستعار",
         "bio": "نبذة",
         "questions": "أسئلة",
         "answers": "إجابات"
@@ -490,7 +490,7 @@ const resources = {
         "activity": "Aktibidad",
         "edit": "I-edit",
         "save": "I-save",
-        "display_name": "Pangalan",
+        "display_name": "Alias name",
         "bio": "Bio",
         "questions": "Mga Tanong",
         "answers": "Mga Sagot"
@@ -687,7 +687,7 @@ const resources = {
         "activity": "हाल की गतिविधि",
         "edit": "प्रोफ़ाइल संपादित करें",
         "save": "सहेजें",
-        "display_name": "नाम",
+        "display_name": "उपनाम",
         "bio": "परिचय",
         "questions": "प्रश्न",
         "answers": "उत्तर"
@@ -884,7 +884,7 @@ const resources = {
         "activity": "最近活动",
         "edit": "编辑资料",
         "save": "保存",
-        "display_name": "显示名称",
+        "display_name": "别名",
         "bio": "简介",
         "questions": "问题",
         "answers": "回答"
@@ -1081,7 +1081,7 @@ const resources = {
         "activity": "Activité",
         "edit": "Modifier",
         "save": "Enregistrer",
-        "display_name": "Nom",
+        "display_name": "Nom d'alias",
         "bio": "Bio",
         "questions": "Questions",
         "answers": "Réponses"
@@ -1278,7 +1278,7 @@ const resources = {
         "activity": "Actividad",
         "edit": "Editar perfil",
         "save": "Guardar",
-        "display_name": "Nombre",
+        "display_name": "Nombre de alias",
         "bio": "Biografía",
         "questions": "Preguntas",
         "answers": "Respuestas"
@@ -1475,7 +1475,7 @@ const resources = {
         "activity": "Активность",
         "edit": "Редактировать",
         "save": "Сохранить",
-        "display_name": "Имя",
+        "display_name": "Псевдоним",
         "bio": "О себе",
         "questions": "Вопросы",
         "answers": "Ответы"
@@ -1672,7 +1672,7 @@ const resources = {
         "activity": "Активність",
         "edit": "Редактировать",
         "save": "Зберегти",
-        "display_name": "Ім'я",
+        "display_name": "Псевдонім",
         "bio": "Про себе",
         "questions": "Питання",
         "answers": "Відповіді"
@@ -1869,7 +1869,7 @@ const resources = {
         "activity": "فعالیت‌ها",
         "edit": "ویرایش",
         "save": "ذخیره",
-        "display_name": "نام",
+        "display_name": "نام مستعار",
         "bio": "درباره من",
         "questions": "سوالات",
         "answers": "پاسخ‌ها"
@@ -2066,7 +2066,7 @@ const resources = {
         "activity": "سرگرمی",
         "edit": "ترمیم",
         "save": "محفوظ کریں",
-        "display_name": "نام",
+        "display_name": "نام مستعار",
         "bio": "تعارف",
         "questions": "سوالات",
         "answers": "جوابات"
@@ -2263,7 +2263,7 @@ const resources = {
         "activity": "কার্যকলাপ",
         "edit": "সম্পাদনা",
         "save": "সংরক্ষণ",
-        "display_name": "নাম",
+        "display_name": "উপনাম",
         "bio": "বায়ো",
         "questions": "প্রশ্ন",
         "answers": "উত্তর"
@@ -2460,7 +2460,7 @@ const resources = {
         "activity": "Aktivite",
         "edit": "Düzenle",
         "save": "Kaydet",
-        "display_name": "Ad",
+        "display_name": "Takma ad",
         "bio": "Hakkımda",
         "questions": "Sorular",
         "answers": "Cevaplar"

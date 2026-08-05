@@ -15,6 +15,20 @@ import { useColors } from '@/hooks/useColors';
 import { BrandText, PillButton, fonts } from '@/components/ui';
 import { radiusPill } from '@/constants/colors';
 
+function sanitizeUsername(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[^a-z0-9_-]/g, '')
+    .slice(0, 30);
+}
+
+function suggestUsernameFrom(email: string, alias: string): string {
+  const local = email.includes('@') ? email.split('@')[0] ?? '' : email;
+  const source = local.trim() || alias.trim();
+  return sanitizeUsername(source);
+}
+
 export default function SignUpScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -24,19 +38,35 @@ export default function SignUpScreen() {
   const [emailAddress, setEmailAddress] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-  const [displayName, setDisplayName] = useState('');
+  const [aliasName, setAliasName] = useState('');
+  const [usernameTouched, setUsernameTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const syncUsernameSuggestion = (nextEmail: string, nextAlias: string) => {
+    if (usernameTouched) return;
+    setUsername(suggestUsernameFrom(nextEmail, nextAlias));
+  };
+
   const handleSubmit = async () => {
     setError(null);
+    const handle = sanitizeUsername(username);
+    const alias = aliasName.trim();
+    if (handle.length < 3) {
+      setError('Username must be at least 3 characters (letters, numbers, _ or -).');
+      return;
+    }
+    if (!alias) {
+      setError('Alias name is required.');
+      return;
+    }
     setLoading(true);
     try {
       await signUp({
         email: emailAddress.trim(),
         password,
-        username: username.trim(),
-        displayName: (displayName || username).trim(),
+        username: handle,
+        displayName: alias,
       });
       router.dismissAll();
       router.replace('/' as Href);
@@ -77,33 +107,70 @@ export default function SignUpScreen() {
         Join The Proven X community
       </Text>
 
-      <TextInput
-        testID="input-display-name"
-        style={inputStyle}
-        value={displayName}
-        placeholder="Display name"
-        placeholderTextColor={colors.mutedForeground}
-        onChangeText={setDisplayName}
-      />
-      <TextInput
-        testID="input-username"
-        style={inputStyle}
-        autoCapitalize="none"
-        value={username}
-        placeholder="Username"
-        placeholderTextColor={colors.mutedForeground}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        testID="input-email"
-        style={inputStyle}
-        autoCapitalize="none"
-        value={emailAddress}
-        placeholder="Email address"
-        placeholderTextColor={colors.mutedForeground}
-        onChangeText={setEmailAddress}
-        keyboardType="email-address"
-      />
+      <View style={styles.field}>
+        <TextInput
+          testID="input-email"
+          style={inputStyle}
+          autoCapitalize="none"
+          value={emailAddress}
+          placeholder="Email address"
+          placeholderTextColor={colors.mutedForeground}
+          onChangeText={(next) => {
+            setEmailAddress(next);
+            syncUsernameSuggestion(next, aliasName);
+          }}
+          keyboardType="email-address"
+        />
+      </View>
+
+      <View style={styles.field}>
+        <TextInput
+          testID="input-display-name"
+          style={inputStyle}
+          value={aliasName}
+          placeholder="Alias name"
+          placeholderTextColor={colors.mutedForeground}
+          onChangeText={(next) => {
+            setAliasName(next);
+            syncUsernameSuggestion(emailAddress, next);
+          }}
+        />
+        <Text style={[styles.hint, { color: colors.mutedForeground }]}>
+          How your name appears in the community. Not unique — spaces allowed.
+        </Text>
+      </View>
+
+      <View style={styles.field}>
+        <View style={styles.usernameRow}>
+          <Text
+            style={{
+              color: colors.mutedForeground,
+              fontFamily: fonts.regular,
+              fontSize: 15,
+              paddingLeft: 4,
+            }}
+          >
+            @
+          </Text>
+          <TextInput
+            testID="input-username"
+            style={[inputStyle, styles.usernameInput]}
+            autoCapitalize="none"
+            value={username}
+            placeholder="username"
+            placeholderTextColor={colors.mutedForeground}
+            onChangeText={(next) => {
+              setUsernameTouched(true);
+              setUsername(sanitizeUsername(next));
+            }}
+          />
+        </View>
+        <Text style={[styles.hint, { color: colors.mutedForeground }]}>
+          Unique handle for your profile and mentions. No spaces. Suggested from email or alias —
+          you can edit it.
+        </Text>
+      </View>
+
       <TextInput
         testID="input-password"
         style={inputStyle}
@@ -120,7 +187,7 @@ export default function SignUpScreen() {
       <PillButton
         label="Create account"
         testID="button-sign-up"
-        disabled={!emailAddress || !password || !username}
+        disabled={!emailAddress || !password || !username || !aliasName.trim()}
         loading={loading}
         onPress={handleSubmit}
       />
@@ -143,6 +210,23 @@ const styles = StyleSheet.create({
   container: {
     padding: 24,
     gap: 14,
+  },
+  field: {
+    gap: 6,
+  },
+  hint: {
+    fontSize: 12,
+    fontFamily: 'PlusJakartaSans_400Regular',
+    lineHeight: 16,
+    paddingHorizontal: 4,
+  },
+  usernameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  usernameInput: {
+    flex: 1,
   },
   input: {
     borderWidth: 1,

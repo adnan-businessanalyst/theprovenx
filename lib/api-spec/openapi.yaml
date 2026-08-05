@@ -1089,8 +1089,17 @@ components:
       properties:
         email: { type: string, minLength: 3, maxLength: 320 }
         password: { type: string, minLength: 8, maxLength: 128 }
-        username: { type: string, minLength: 3, maxLength: 30 }
-        displayName: { type: string, minLength: 1, maxLength: 80 }
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          pattern: "^[a-z0-9_-]+$"
+          description: Unique handle; no spaces. Letters, numbers, underscore, hyphen only.
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 80
+          description: Alias name shown in the UI (not unique; spaces allowed)
       required: [email, password, username, displayName]
     LoginInput:
       type: object
