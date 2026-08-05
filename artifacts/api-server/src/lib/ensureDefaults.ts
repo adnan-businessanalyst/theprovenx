@@ -17,12 +17,46 @@ const DEFAULT_CATEGORIES = [
   { slug: "other", name: "Other", description: "Topics that do not fit the other categories" },
 ];
 
+let schemaReady: Promise<void> | null = null;
+
+/**
+ * Idempotent DDL for moderation columns/tables so production DBs that
+ * never ran drizzle push still work after deploy.
+ */
+export async function ensureQuestionModerationSchema(): Promise<void> {
+  if (!schemaReady) {
+    schemaReady = (async () => {
+      await db.execute(sql`
+        ALTER TABLE questions
+        ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'published'
+      `);
+      await db.execute(sql`
+        CREATE INDEX IF NOT EXISTS questions_status_idx ON questions (status)
+      `);
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS site_settings (
+          id serial PRIMARY KEY,
+          questions_require_review boolean NOT NULL DEFAULT false,
+          updated_at timestamptz NOT NULL DEFAULT now()
+        )
+      `);
+      logger.info("Ensured question moderation schema");
+    })().catch((err) => {
+      schemaReady = null;
+      throw err;
+    });
+  }
+  await schemaReady;
+}
+
 /**
  * Idempotently provisions the default categories so question creation
  * (which requires a categorySlug) can never dead-end on a fresh database.
  * Also ensures the "other" category exists on databases that were seeded earlier.
  */
 export async function ensureDefaultCategories(): Promise<void> {
+  await ensureQuestionModerationSchema();
+
   const existing = await db.select({ id: categoriesTable.id }).from(categoriesTable).limit(1);
   if (existing.length === 0) {
     await db.insert(categoriesTable).values(DEFAULT_CATEGORIES).onConflictDoNothing();
@@ -43,6 +77,7 @@ export async function ensureDefaultCategories(): Promise<void> {
 }
 
 export async function ensureSiteSettings(): Promise<void> {
+  await ensureQuestionModerationSchema();
   const [row] = await db.select().from(siteSettingsTable).where(eq(siteSettingsTable.id, 1)).limit(1);
   if (!row) {
     await db.insert(siteSettingsTable).values({ id: 1, questionsRequireReview: false }).onConflictDoNothing();

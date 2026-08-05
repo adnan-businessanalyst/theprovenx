@@ -16,15 +16,21 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-app.listen(port, (err) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
+async function start() {
+  try {
+    await ensureDefaultCategories();
+  } catch (err) {
+    logger.error({ err }, "Failed to provision defaults / schema");
     process.exit(1);
   }
 
-  logger.info({ port }, "Server listening");
-
-  ensureDefaultCategories().catch((err) => {
-    logger.error({ err }, "Failed to provision default categories");
+  app.listen(port, (err) => {
+    if (err) {
+      logger.error({ err }, "Error listening on port");
+      process.exit(1);
+    }
+    logger.info({ port }, "Server listening");
   });
-});
+}
+
+start();
