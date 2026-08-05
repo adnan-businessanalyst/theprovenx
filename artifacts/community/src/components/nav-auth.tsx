@@ -36,17 +36,19 @@ import { useAuth } from "@/lib/auth";
 export function NavAuth() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const { isLoaded, isSignedIn, signOut } = useAuth();
+  const { isLoaded, isSignedIn, user, signOut } = useAuth();
   const queryClient = useQueryClient();
   const setLocation = (to: string) => router.push(to);
 
-  const { data: me } = useGetMe({
+  const { data: meData } = useGetMe({
     query: {
       enabled: isLoaded && isSignedIn,
       queryKey: getGetMeQueryKey(),
       retry: false,
     },
   });
+
+  const me = meData ?? (isSignedIn ? user : null) ?? null;
 
   const { data: notifications } = useListNotifications(
     { limit: 10 },
@@ -77,7 +79,7 @@ export function NavAuth() {
     );
   }
 
-  if (!me) {
+  if (!isSignedIn) {
     return (
       <Link
         href="/sign-in"
@@ -85,6 +87,12 @@ export function NavAuth() {
       >
         {t("nav.sign_in")}
       </Link>
+    );
+  }
+
+  if (!me) {
+    return (
+      <div className="h-9 w-20 animate-pulse rounded-full bg-muted/60" aria-hidden />
     );
   }
 
@@ -215,6 +223,7 @@ export function NavAuth() {
             onClick={async () => {
               await signOut();
               router.push("/");
+              router.refresh();
             }}
             className="cursor-pointer text-destructive focus:text-destructive rounded-md"
           >

@@ -50,6 +50,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         });
       }
       router.replace(redirect.startsWith("/") ? redirect : "/");
+      router.refresh();
     } catch (err: unknown) {
       setError(formatAuthError(err, "Something went wrong. Please try again."));
     } finally {

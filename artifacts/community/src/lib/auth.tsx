@@ -37,9 +37,18 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+function isAuthQueryKey(queryKey: readonly unknown[]): boolean {
+  const root = queryKey[0];
+  return root === "/api/auth/me" || root === "/api/me";
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [bootstrapped, setBootstrapped] = useState(false);
+  /** Immediate UI override so login/logout don't wait on query refetch races. */
+  const [sessionUser, setSessionUser] = useState<User | null | undefined>(
+    undefined,
+  );
 
   const meQuery = useGetAuthMe({
     query: {
@@ -55,9 +64,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [meQuery.isFetching, meQuery.isSuccess, meQuery.isError]);
 
-  const user = meQuery.isError ? null : meQuery.data;
-  const isLoaded = bootstrapped || meQuery.isSuccess || meQuery.isError;
+  // Drop the override once the network query matches the intended session.
+  useEffect(() => {
+    if (sessionUser === undefined || meQuery.isFetching) return;
+    if (sessionUser === null) {
+      if (meQuery.isError || meQuery.data == null) {
+        setSessionUser(undefined);
+      }
+      return;
+    }
+    if (meQuery.data?.id === sessionUser.id) {
+      setSessionUser(undefined);
+    }
+  }, [sessionUser, meQuery.isFetching, meQuery.isError, meQuery.data]);
+
+  const userFromQuery = meQuery.isError ? null : (meQuery.data ?? null);
+  const user = sessionUser !== undefined ? sessionUser : userFromQuery;
+  const isLoaded =
+    sessionUser !== undefined ||
+    bootstrapped ||
+    meQuery.isSuccess ||
+    meQuery.isError;
   const isSignedIn = !!user;
+
+  const seedAuthUser = useCallback(
+    (nextUser: User) => {
+      queryClient.setQueryData(getGetAuthMeQueryKey(), nextUser);
+      queryClient.setQueryData(getGetMeQueryKey(), nextUser);
+      setSessionUser(nextUser);
+      setBootstrapped(true);
+    },
+    [queryClient],
+  );
+
+  const clearAuthUser = useCallback(() => {
+    queryClient.setQueryData(getGetAuthMeQueryKey(), null);
+    queryClient.setQueryData(getGetMeQueryKey(), null);
+    setSessionUser(null);
+    setBootstrapped(true);
+  }, [queryClient]);
+
+  const invalidateNonAuth = useCallback(async () => {
+    await queryClient.invalidateQueries({
+      predicate: (query) => !isAuthQueryKey(query.queryKey),
+    });
+  }, [queryClient]);
 
   const invalidateAuth = useCallback(async () => {
     await Promise.all([
@@ -68,11 +119,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(
     async (email: string, password: string) => {
-      await login({ email, password });
+      const session = await login({ email, password });
       queryClient.clear();
-      await invalidateAuth();
+      seedAuthUser(session.user);
+      await invalidateNonAuth();
     },
-    [invalidateAuth, queryClient],
+    [invalidateNonAuth, queryClient, seedAuthUser],
   );
 
   const signUp = useCallback(
@@ -82,21 +134,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       username: string;
       displayName: string;
     }) => {
-      await register(input);
+      const session = await register(input);
       queryClient.clear();
-      await invalidateAuth();
+      seedAuthUser(session.user);
+      await invalidateNonAuth();
     },
-    [invalidateAuth, queryClient],
+    [invalidateNonAuth, queryClient, seedAuthUser],
   );
 
   const signOut = useCallback(async () => {
     try {
       await logoutRequest();
     } finally {
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: getGetAuthMeQueryKey() }),
+        queryClient.cancelQueries({ queryKey: getGetMeQueryKey() }),
+      ]);
       queryClient.clear();
-      await invalidateAuth();
+      clearAuthUser();
+      await invalidateNonAuth();
     }
-  }, [invalidateAuth, queryClient]);
+  }, [clearAuthUser, invalidateNonAuth, queryClient]);
 
   const refresh = useCallback(async () => {
     await invalidateAuth();
