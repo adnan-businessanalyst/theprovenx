@@ -835,6 +835,59 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+  /admin/settings:
+    get:
+      operationId: getAdminSettings
+      tags: [admin]
+      summary: Get site settings
+      responses:
+        "200":
+          description: Site settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+    patch:
+      operationId: updateAdminSettings
+      tags: [admin]
+      summary: Update site settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SiteSettingsUpdate"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+  /admin/questions:
+    get:
+      operationId: listQuestionsAdmin
+      tags: [admin]
+      summary: List all questions for moderation
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [published, pending_review, suspended]
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          description: Questions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionList"
   /admin/questions/{id}:
     delete:
       operationId: deleteQuestionAdmin
@@ -853,9 +906,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiMessage"
     patch:
-      operationId: featureQuestionAdmin
+      operationId: updateQuestionAdmin
       tags: [admin]
-      summary: Pin/unpin (feature) a question
+      summary: Update question moderation fields (status, featured)
       parameters:
         - name: id
           in: path
@@ -866,7 +919,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/QuestionFeatureUpdate"
+              $ref: "#/components/schemas/QuestionAdminUpdate"
       responses:
         "200":
           description: Updated question
@@ -1167,11 +1220,14 @@ components:
         viewCount: { type: integer }
         hasAcceptedAnswer: { type: boolean }
         isFeatured: { type: boolean }
+        status:
+          type: string
+          enum: [published, pending_review, suspended]
         myVote: { type: ["integer", "null"] }
         createdAt: { type: string }
         updatedAt: { type: string }
       required:
-        [id, slug, title, body, language, author, tags, score, answerCount, viewCount, hasAcceptedAnswer, isFeatured, createdAt, updatedAt]
+        [id, slug, title, body, language, author, tags, score, answerCount, viewCount, hasAcceptedAnswer, isFeatured, status, createdAt, updatedAt]
     QuestionDetail:
       type: object
       properties:
@@ -1205,17 +1261,30 @@ components:
         tags:
           type: array
           items: { type: string }
-          minItems: 1
-          maxItems: 5
+          minItems: 0
+          maxItems: 1
+          description: Optional; only used when categorySlug is "other"
         categorySlug: { type: string, minLength: 1 }
         language: { type: string }
         website: { type: string, description: "Honeypot field - must be empty" }
-      required: [title, body, tags, categorySlug]
-    QuestionFeatureUpdate:
+      required: [title, body, categorySlug]
+    QuestionAdminUpdate:
       type: object
       properties:
         isFeatured: { type: boolean }
-      required: [isFeatured]
+        status:
+          type: string
+          enum: [published, pending_review, suspended]
+    SiteSettings:
+      type: object
+      properties:
+        questionsRequireReview: { type: boolean }
+      required: [questionsRequireReview]
+    SiteSettingsUpdate:
+      type: object
+      properties:
+        questionsRequireReview: { type: boolean }
+      required: [questionsRequireReview]
     Answer:
       type: object
       properties:

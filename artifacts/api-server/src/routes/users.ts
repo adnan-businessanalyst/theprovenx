@@ -100,7 +100,13 @@ router.get("/users/:username", async (req, res): Promise<void> => {
     .from(questionTagsTable)
     .innerJoin(tagsTable, eq(questionTagsTable.tagId, tagsTable.id))
     .innerJoin(questionsTable, eq(questionTagsTable.questionId, questionsTable.id))
-    .where(and(eq(questionsTable.authorId, user.id), eq(questionsTable.isDeleted, false)))
+    .where(
+      and(
+        eq(questionsTable.authorId, user.id),
+        eq(questionsTable.isDeleted, false),
+        eq(questionsTable.status, "published"),
+      ),
+    )
     .groupBy(tagsTable.id)
     .orderBy(desc(sql`count(*)`))
     .limit(5);
@@ -108,7 +114,13 @@ router.get("/users/:username", async (req, res): Promise<void> => {
   const recentQuestions = await db
     .select()
     .from(questionsTable)
-    .where(and(eq(questionsTable.authorId, user.id), eq(questionsTable.isDeleted, false)))
+    .where(
+      and(
+        eq(questionsTable.authorId, user.id),
+        eq(questionsTable.isDeleted, false),
+        eq(questionsTable.status, "published"),
+      ),
+    )
     .orderBy(desc(questionsTable.createdAt))
     .limit(5);
 
@@ -155,7 +167,13 @@ router.get("/users/:username/activity", async (req, res): Promise<void> => {
   const questions = await db
     .select()
     .from(questionsTable)
-    .where(and(eq(questionsTable.authorId, user.id), eq(questionsTable.isDeleted, false)))
+    .where(
+      and(
+        eq(questionsTable.authorId, user.id),
+        eq(questionsTable.isDeleted, false),
+        eq(questionsTable.status, "published"),
+      ),
+    )
     .orderBy(desc(questionsTable.createdAt))
     .limit(20);
 

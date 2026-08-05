@@ -19,20 +19,27 @@ import {
   useUpdateTagAdmin,
   useDeleteTagAdmin,
   useListSponsorInquiriesAdmin, getListSponsorInquiriesAdminQueryKey,
-  useUpdateSponsorInquiryAdmin
+  useUpdateSponsorInquiryAdmin,
+  useGetAdminSettings, getGetAdminSettingsQueryKey,
+  useUpdateAdminSettings,
+  useListQuestionsAdmin, getListQuestionsAdminQueryKey,
+  useUpdateQuestionAdmin,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LoadingScreen } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
-import { ShieldAlert, Users, Flag, Activity, CreditCard, Ban, Trash2, Edit2, Plus, Grid2X2, Layers, Megaphone, Mail } from "lucide-react";
+import { ShieldAlert, Users, Flag, Activity, CreditCard, Ban, Trash2, Edit2, Plus, Grid2X2, Layers, Megaphone, Mail, HelpCircle, CheckCircle2, PauseCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+
+type QuestionStatusFilter = "all" | "published" | "pending_review" | "suspended";
 
 export default function Admin() {
   const { t } = useTranslation();
@@ -40,26 +47,27 @@ export default function Admin() {
   const searchParams = useSearchParams();
   const setLocation = (to: string) => router.push(to);
   const tabParam = searchParams.get("tab");
-  const initialTab = ["flags", "users", "taxonomy", "sponsors", "transactions"].includes(
+  const initialTab = ["flags", "questions", "users", "taxonomy", "sponsors", "transactions"].includes(
     tabParam ?? "",
   )
     ? tabParam!
     : "flags";
   const queryClient = useQueryClient();
+  const isStaffRole = (role?: string) => role === "admin" || role === "platform_owner";
 
   const { data: me, isLoading: meLoading } = useGetMe({ query: { queryKey: getGetMeQueryKey(), retry: false } });
 
   const { data: overview, isLoading: overviewLoading } = useGetAdminOverview({
-    query: { enabled: (me?.role === 'admin' || me?.role === 'platform_owner'), queryKey: getGetAdminOverviewQueryKey() }
+    query: { enabled: isStaffRole(me?.role), queryKey: getGetAdminOverviewQueryKey() }
   });
 
   const { data: flags } = useListFlags({
-    query: { enabled: (me?.role === 'admin' || me?.role === 'platform_owner'), queryKey: getListFlagsQueryKey() }
+    query: { enabled: isStaffRole(me?.role), queryKey: getListFlagsQueryKey() }
   });
 
   const { data: users } = useListUsersAdmin(
     { q: '' },
-    { query: { enabled: (me?.role === 'admin' || me?.role === 'platform_owner'), queryKey: getListUsersAdminQueryKey({ q: '' }) } }
+    { query: { enabled: isStaffRole(me?.role), queryKey: getListUsersAdminQueryKey({ q: '' }) } }
   );
 
   const resolveFlag = useResolveFlag();
@@ -67,10 +75,26 @@ export default function Admin() {
   const [sponsorStatusFilter, setSponsorStatusFilter] = useState<'all' | 'new' | 'contacted' | 'closed'>('all');
   const sponsorParams = sponsorStatusFilter === 'all' ? undefined : { status: sponsorStatusFilter };
   const { data: sponsorInquiries } = useListSponsorInquiriesAdmin(sponsorParams, {
-    query: { enabled: (me?.role === 'admin' || me?.role === 'platform_owner'), queryKey: getListSponsorInquiriesAdminQueryKey(sponsorParams) }
+    query: { enabled: isStaffRole(me?.role), queryKey: getListSponsorInquiriesAdminQueryKey(sponsorParams) }
   });
 
   const updateSponsorInquiry = useUpdateSponsorInquiryAdmin();
+
+  const [questionStatusFilter, setQuestionStatusFilter] = useState<QuestionStatusFilter>("all");
+  const questionListParams =
+    questionStatusFilter === "all" ? { page: 1, pageSize: 50 } : { status: questionStatusFilter, page: 1, pageSize: 50 };
+
+  const { data: adminSettings } = useGetAdminSettings({
+    query: { enabled: isStaffRole(me?.role), queryKey: getGetAdminSettingsQueryKey() },
+  });
+  const updateSettings = useUpdateAdminSettings();
+  const { data: adminQuestions } = useListQuestionsAdmin(questionListParams, {
+    query: {
+      enabled: isStaffRole(me?.role),
+      queryKey: getListQuestionsAdminQueryKey(questionListParams),
+    },
+  });
+  const updateQuestion = useUpdateQuestionAdmin();
 
   if (meLoading || overviewLoading) {
     return <LoadingScreen />;
@@ -99,6 +123,48 @@ export default function Admin() {
         queryClient.invalidateQueries({ queryKey: getGetAdminOverviewQueryKey() });
       }
     });
+  };
+
+  const handleToggleReviewMode = () => {
+    const next = !adminSettings?.questionsRequireReview;
+    updateSettings.mutate(
+      { data: { questionsRequireReview: next } },
+      {
+        onSuccess: () => {
+          toast.success(
+            next
+              ? "Every new question now needs reviewing"
+              : "New questions publish immediately",
+          );
+          queryClient.invalidateQueries({ queryKey: getGetAdminSettingsQueryKey() });
+        },
+        onError: () => toast.error("Could not update settings"),
+      },
+    );
+  };
+
+  const handleQuestionStatus = (id: number, status: "published" | "suspended") => {
+    updateQuestion.mutate(
+      { id, data: { status } },
+      {
+        onSuccess: () => {
+          toast.success(status === "published" ? "Question published" : "Question suspended");
+          queryClient.invalidateQueries({ queryKey: getListQuestionsAdminQueryKey(questionListParams) });
+          queryClient.invalidateQueries({ queryKey: getGetAdminOverviewQueryKey() });
+        },
+        onError: () => toast.error("Could not update question"),
+      },
+    );
+  };
+
+  const statusBadge = (status: string) => {
+    if (status === "published") {
+      return <Badge className="rounded-full bg-green-500/10 text-green-700 hover:bg-green-500/10">Published</Badge>;
+    }
+    if (status === "pending_review") {
+      return <Badge className="rounded-full bg-amber-500/10 text-amber-700 hover:bg-amber-500/10">Pending review</Badge>;
+    }
+    return <Badge variant="destructive" className="rounded-full">Suspended</Badge>;
   };
 
   return (
@@ -149,6 +215,9 @@ export default function Admin() {
             <TabsTrigger value="flags" className="rounded-full px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2">
               <Flag className="h-4 w-4" /> Reports {overview?.openFlagCount ? <Badge variant="destructive" className="ml-1 px-1.5 py-0 h-5 rounded-full">{overview.openFlagCount}</Badge> : ''}
             </TabsTrigger>
+            <TabsTrigger value="questions" className="rounded-full px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2">
+              <HelpCircle className="h-4 w-4" /> Questions
+            </TabsTrigger>
             <TabsTrigger value="users" className="rounded-full px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2">
               <Users className="h-4 w-4" /> Users
             </TabsTrigger>
@@ -162,6 +231,105 @@ export default function Admin() {
               <CreditCard className="h-4 w-4" /> Financials
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="questions" className="space-y-6">
+            <div className="p-5 rounded-2xl border bg-card shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="font-serif font-bold text-lg">Question publishing</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {adminSettings?.questionsRequireReview
+                    ? "Every new question needs reviewing before it is public."
+                    : "New questions are published immediately (default)."}
+                </p>
+              </div>
+              <Button
+                variant={adminSettings?.questionsRequireReview ? "default" : "outline"}
+                className="rounded-full shrink-0"
+                disabled={updateSettings.isPending}
+                onClick={handleToggleReviewMode}
+              >
+                {adminSettings?.questionsRequireReview
+                  ? "Switch to publish immediately"
+                  : "Every question needs reviewing"}
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {([
+                ["all", "All"],
+                ["pending_review", "Pending"],
+                ["published", "Published"],
+                ["suspended", "Suspended"],
+              ] as const).map(([value, label]) => (
+                <Button
+                  key={value}
+                  size="sm"
+                  variant={questionStatusFilter === value ? "default" : "outline"}
+                  className="rounded-full"
+                  onClick={() => setQuestionStatusFilter(value)}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+
+            {adminQuestions?.items?.length ? (
+              <div className="space-y-3">
+                {adminQuestions.items.map((q) => (
+                  <div
+                    key={q.id}
+                    className="p-5 rounded-2xl border bg-card shadow-sm flex flex-col md:flex-row gap-4 md:items-center"
+                  >
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {statusBadge(q.status)}
+                        {q.category ? (
+                          <Badge variant="outline" className="rounded-full">{q.category.name}</Badge>
+                        ) : null}
+                        <span className="text-xs text-muted-foreground">
+                          @{q.author.username} · {formatDistanceToNow(new Date(q.createdAt), { addSuffix: true })}
+                        </span>
+                      </div>
+                      <Link
+                        href={`/questions/${q.slug}`}
+                        className="font-serif font-bold text-lg hover:text-primary transition-colors line-clamp-2"
+                      >
+                        {q.title}
+                      </Link>
+                    </div>
+                    <div className="flex flex-wrap gap-2 shrink-0">
+                      {q.status !== "published" ? (
+                        <Button
+                          size="sm"
+                          className="rounded-full"
+                          disabled={updateQuestion.isPending}
+                          onClick={() => handleQuestionStatus(q.id, "published")}
+                        >
+                          <CheckCircle2 className="h-4 w-4 mr-1.5" /> Publish
+                        </Button>
+                      ) : null}
+                      {q.status !== "suspended" ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="rounded-full"
+                          disabled={updateQuestion.isPending}
+                          onClick={() => handleQuestionStatus(q.id, "suspended")}
+                        >
+                          <PauseCircle className="h-4 w-4 mr-1.5" /> Suspend
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20 bg-muted/20 border border-dashed rounded-3xl text-muted-foreground">
+                <HelpCircle className="h-12 w-12 opacity-20 mx-auto mb-4" />
+                No questions in this filter.
+              </div>
+            )}
+          </TabsContent>
 
           <TabsContent value="flags" className="space-y-4">
             {flags && flags.length > 0 ? (

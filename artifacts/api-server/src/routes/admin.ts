@@ -11,21 +11,25 @@ import {
   categoriesTable,
   transactionsTable,
   sponsorInquiriesTable,
+  siteSettingsTable,
 } from "@workspace/db";
 import {
   ResolveFlagBody,
   ListUsersAdminQueryParams,
   UpdateUserAdminBody,
-  FeatureQuestionAdminBody,
+  UpdateQuestionAdminBody,
   UpdateTagAdminBody,
   CreateTagAdminBody,
   CreateCategoryAdminBody,
   UpdateCategoryAdminBody,
   ListSponsorInquiriesAdminQueryParams,
   UpdateSponsorInquiryAdminBody,
+  ListQuestionsAdminQueryParams,
+  UpdateAdminSettingsBody,
 } from "@workspace/api-zod";
 import { requireAdmin, requireModerator } from "../lib/currentUser";
-import { serializeUsers } from "../lib/serialize";
+import { serializeUsers, serializeQuestions } from "../lib/serialize";
+import { ensureSiteSettings, getSiteSettings } from "../lib/ensureDefaults";
 
 const router: IRouter = Router();
 
@@ -210,23 +214,84 @@ router.delete("/admin/questions/:id", requireAdmin, async (req, res): Promise<vo
   res.json({ message: "Question removed" });
 });
 
+router.get("/admin/settings", requireAdmin, async (_req, res): Promise<void> => {
+  const settings = await getSiteSettings();
+  res.json({ questionsRequireReview: settings.questionsRequireReview });
+});
+
+router.patch("/admin/settings", requireAdmin, async (req, res): Promise<void> => {
+  const parsed = UpdateAdminSettingsBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ message: "Invalid request" });
+    return;
+  }
+  await ensureSiteSettings();
+  const [updated] = await db
+    .update(siteSettingsTable)
+    .set({ questionsRequireReview: parsed.data.questionsRequireReview })
+    .where(eq(siteSettingsTable.id, 1))
+    .returning();
+  res.json({ questionsRequireReview: updated.questionsRequireReview });
+});
+
+router.get("/admin/questions", requireAdmin, async (req, res): Promise<void> => {
+  const parsed = ListQuestionsAdminQueryParams.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ message: parsed.error.message });
+    return;
+  }
+  const { status, page = 1, pageSize = 20 } = parsed.data;
+  const size = Math.min(pageSize, 50);
+  const conditions = [eq(questionsTable.isDeleted, false)];
+  if (status) conditions.push(eq(questionsTable.status, status));
+
+  const where = and(...conditions);
+  const [{ total }] = await db
+    .select({ total: sql<number>`count(*)::int` })
+    .from(questionsTable)
+    .where(where);
+  const rows = await db
+    .select()
+    .from(questionsTable)
+    .where(where)
+    .orderBy(desc(questionsTable.createdAt))
+    .limit(size)
+    .offset((page - 1) * size);
+
+  res.json({
+    items: await serializeQuestions(rows, req.localUser?.id),
+    total,
+    page,
+    pageSize: size,
+  });
+});
+
 router.patch("/admin/questions/:id", requireAdmin, async (req, res): Promise<void> => {
   const id = parseId(req.params.id);
-  const parsed = FeatureQuestionAdminBody.safeParse(req.body);
+  const parsed = UpdateQuestionAdminBody.safeParse(req.body);
   if (!Number.isFinite(id) || !parsed.success) {
     res.status(400).json({ message: "Invalid request" });
     return;
   }
+  if (parsed.data.isFeatured === undefined && parsed.data.status === undefined) {
+    res.status(400).json({ message: "No updates provided" });
+    return;
+  }
+  const patch: { isFeatured?: boolean; status?: string } = {};
+  if (parsed.data.isFeatured !== undefined) patch.isFeatured = parsed.data.isFeatured;
+  if (parsed.data.status !== undefined) patch.status = parsed.data.status;
+
   const [updated] = await db
     .update(questionsTable)
-    .set({ isFeatured: parsed.data.isFeatured })
+    .set(patch)
     .where(and(eq(questionsTable.id, id), eq(questionsTable.isDeleted, false)))
     .returning();
   if (!updated) {
     res.status(404).json({ message: "Question not found" });
     return;
   }
-  res.json({ message: updated.isFeatured ? "Question pinned" : "Question unpinned" });
+  const [serialized] = await serializeQuestions([updated], req.localUser?.id);
+  res.json(serialized);
 });
 
 router.delete("/admin/answers/:id", requireAdmin, async (req, res): Promise<void> => {

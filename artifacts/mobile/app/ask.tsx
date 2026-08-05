@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -34,6 +33,7 @@ export default function AskScreen() {
 
   const categoriesQuery = useListCategories();
   const tagsQuery = useListTags();
+  const showOptionalTag = categorySlug === 'other';
 
   const createQuestion = useCreateQuestion({
     mutation: {
@@ -53,20 +53,21 @@ export default function AskScreen() {
   });
 
   const toggleTag = (slug: string) => {
-    setTags((prev) =>
-      prev.includes(slug)
-        ? prev.filter((t) => t !== slug)
-        : prev.length < 5
-          ? [...prev, slug]
-          : prev,
-    );
+    setTags((prev) => {
+      if (prev.includes(slug)) return prev.filter((t) => t !== slug);
+      return [slug];
+    });
+  };
+
+  const selectCategory = (slug: string) => {
+    setCategorySlug(slug);
+    if (slug !== 'other') setTags([]);
   };
 
   const valid =
     title.trim().length >= 10 &&
     body.trim().length >= 20 &&
-    !!categorySlug &&
-    tags.length >= 1;
+    !!categorySlug;
 
   const submit = () => {
     if (!valid || !categorySlug) return;
@@ -75,7 +76,7 @@ export default function AskScreen() {
       data: {
         title: title.trim(),
         body: body.trim(),
-        tags,
+        tags: categorySlug === 'other' ? tags.slice(0, 1) : [],
         categorySlug,
       },
     });
@@ -137,29 +138,40 @@ export default function AskScreen() {
               key={c.slug}
               label={c.name}
               selected={categorySlug === c.slug}
-              onPress={() => setCategorySlug(c.slug)}
+              onPress={() => selectCategory(c.slug)}
               testID={`ask-category-${c.slug}`}
             />
           ))}
         </View>
       </View>
 
-      <View style={styles.field}>
-        <BrandText weight="semibold" style={{ fontSize: 14 }}>
-          Tags <Text style={{ color: colors.mutedForeground, fontFamily: fonts.regular, fontSize: 12 }}>(pick 1–5)</Text>
-        </BrandText>
-        <View style={styles.chipWrap}>
-          {(tagsQuery.data ?? []).map((t) => (
-            <Chip
-              key={t.slug}
-              label={t.name}
-              selected={tags.includes(t.slug)}
-              onPress={() => toggleTag(t.slug)}
-              testID={`ask-tag-${t.slug}`}
-            />
-          ))}
+      {showOptionalTag ? (
+        <View style={styles.field}>
+          <BrandText weight="semibold" style={{ fontSize: 14 }}>
+            Tag{' '}
+            <Text
+              style={{
+                color: colors.mutedForeground,
+                fontFamily: fonts.regular,
+                fontSize: 12,
+              }}
+            >
+              (optional — pick one)
+            </Text>
+          </BrandText>
+          <View style={styles.chipWrap}>
+            {(tagsQuery.data ?? []).map((t) => (
+              <Chip
+                key={t.slug}
+                label={t.name}
+                selected={tags.includes(t.slug)}
+                onPress={() => toggleTag(t.slug)}
+                testID={`ask-tag-${t.slug}`}
+              />
+            ))}
+          </View>
         </View>
-      </View>
+      ) : null}
 
       {errorMessage ? (
         <Text style={{ color: colors.destructive, fontFamily: fonts.medium, fontSize: 13 }}>

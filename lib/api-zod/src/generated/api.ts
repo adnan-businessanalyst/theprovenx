@@ -342,6 +342,7 @@ export const GetUserProfileResponse = zod.object({
   "viewCount": zod.number(),
   "hasAcceptedAnswer": zod.boolean(),
   "isFeatured": zod.boolean(),
+  "status": zod.enum(['published', 'pending_review', 'suspended']),
   "myVote": zod.number().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
@@ -422,6 +423,7 @@ export const ListQuestionsResponse = zod.object({
   "viewCount": zod.number(),
   "hasAcceptedAnswer": zod.boolean(),
   "isFeatured": zod.boolean(),
+  "status": zod.enum(['published', 'pending_review', 'suspended']),
   "myVote": zod.number().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
@@ -441,7 +443,8 @@ export const createQuestionBodyTitleMax = 200;
 export const createQuestionBodyBodyMin = 20;
 export const createQuestionBodyBodyMax = 30000;
 
-export const createQuestionBodyTagsMax = 5;
+export const createQuestionBodyTagsMin = 0;
+export const createQuestionBodyTagsMax = 1;
 
 
 
@@ -449,7 +452,7 @@ export const createQuestionBodyTagsMax = 5;
 export const CreateQuestionBody = zod.object({
   "title": zod.string().min(createQuestionBodyTitleMin).max(createQuestionBodyTitleMax),
   "body": zod.string().min(createQuestionBodyBodyMin).max(createQuestionBodyBodyMax),
-  "tags": zod.array(zod.string()).min(1).max(createQuestionBodyTagsMax),
+  "tags": zod.array(zod.string()).min(createQuestionBodyTagsMin).max(createQuestionBodyTagsMax).optional().describe('Optional; only used when categorySlug is \"other\"'),
   "categorySlug": zod.string().min(1),
   "language": zod.string().optional(),
   "website": zod.string().optional().describe('Honeypot field - must be empty')
@@ -486,6 +489,7 @@ export const CreateQuestionResponse = zod.object({
   "viewCount": zod.number(),
   "hasAcceptedAnswer": zod.boolean(),
   "isFeatured": zod.boolean(),
+  "status": zod.enum(['published', 'pending_review', 'suspended']),
   "myVote": zod.number().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
@@ -526,6 +530,7 @@ export const ListFeaturedQuestionsResponseItem = zod.object({
   "viewCount": zod.number(),
   "hasAcceptedAnswer": zod.boolean(),
   "isFeatured": zod.boolean(),
+  "status": zod.enum(['published', 'pending_review', 'suspended']),
   "myVote": zod.number().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
@@ -572,6 +577,7 @@ export const GetQuestionResponse = zod.object({
   "viewCount": zod.number(),
   "hasAcceptedAnswer": zod.boolean(),
   "isFeatured": zod.boolean(),
+  "status": zod.enum(['published', 'pending_review', 'suspended']),
   "myVote": zod.number().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
@@ -770,6 +776,7 @@ export const ListRelatedQuestionsResponseItem = zod.object({
   "viewCount": zod.number(),
   "hasAcceptedAnswer": zod.boolean(),
   "isFeatured": zod.boolean(),
+  "status": zod.enum(['published', 'pending_review', 'suspended']),
   "myVote": zod.number().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
@@ -961,6 +968,7 @@ export const SearchQuestionsResponse = zod.object({
   "viewCount": zod.number(),
   "hasAcceptedAnswer": zod.boolean(),
   "isFeatured": zod.boolean(),
+  "status": zod.enum(['published', 'pending_review', 'suspended']),
   "myVote": zod.number().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
@@ -1251,29 +1259,39 @@ export const UpdateUserAdminResponse = zod.object({
 
 
 /**
- * @summary Remove a question
+ * @summary Get site settings
  */
-export const DeleteQuestionAdminParams = zod.object({
-  "id": zod.coerce.number()
-})
-
-export const DeleteQuestionAdminResponse = zod.object({
-  "message": zod.string()
+export const GetAdminSettingsResponse = zod.object({
+  "questionsRequireReview": zod.boolean()
 })
 
 
 /**
- * @summary Pin/unpin (feature) a question
+ * @summary Update site settings
  */
-export const FeatureQuestionAdminParams = zod.object({
-  "id": zod.coerce.number()
+export const UpdateAdminSettingsBody = zod.object({
+  "questionsRequireReview": zod.boolean()
 })
 
-export const FeatureQuestionAdminBody = zod.object({
-  "isFeatured": zod.boolean()
+export const UpdateAdminSettingsResponse = zod.object({
+  "questionsRequireReview": zod.boolean()
 })
 
-export const FeatureQuestionAdminResponse = zod.object({
+
+/**
+ * @summary List all questions for moderation
+ */
+export const listQuestionsAdminQueryPageDefault = 1;
+export const listQuestionsAdminQueryPageSizeDefault = 20;
+
+export const ListQuestionsAdminQueryParams = zod.object({
+  "status": zod.enum(['published', 'pending_review', 'suspended']).optional(),
+  "page": zod.coerce.number().default(listQuestionsAdminQueryPageDefault),
+  "pageSize": zod.coerce.number().default(listQuestionsAdminQueryPageSizeDefault)
+})
+
+export const ListQuestionsAdminResponse = zod.object({
+  "items": zod.array(zod.object({
   "id": zod.number(),
   "slug": zod.string(),
   "title": zod.string(),
@@ -1304,6 +1322,73 @@ export const FeatureQuestionAdminResponse = zod.object({
   "viewCount": zod.number(),
   "hasAcceptedAnswer": zod.boolean(),
   "isFeatured": zod.boolean(),
+  "status": zod.enum(['published', 'pending_review', 'suspended']),
+  "myVote": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "pageSize": zod.number()
+})
+
+
+/**
+ * @summary Remove a question
+ */
+export const DeleteQuestionAdminParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteQuestionAdminResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Update question moderation fields (status, featured)
+ */
+export const UpdateQuestionAdminParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateQuestionAdminBody = zod.object({
+  "isFeatured": zod.boolean().optional(),
+  "status": zod.enum(['published', 'pending_review', 'suspended']).optional()
+})
+
+export const UpdateQuestionAdminResponse = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "body": zod.string(),
+  "language": zod.string(),
+  "author": zod.object({
+  "id": zod.number(),
+  "username": zod.string(),
+  "displayName": zod.string(),
+  "avatarUrl": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "reputation": zod.number(),
+  "role": zod.enum(['member', 'moderator', 'admin', 'platform_owner']),
+  "plan": zod.enum(['free', 'pro']),
+  "isSuspended": zod.boolean(),
+  "questionCount": zod.number(),
+  "answerCount": zod.number(),
+  "acceptedAnswerCount": zod.number(),
+  "createdAt": zod.string()
+}),
+  "tags": zod.array(zod.string()),
+  "category": zod.union([zod.object({
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()]).optional(),
+  "score": zod.number(),
+  "answerCount": zod.number(),
+  "viewCount": zod.number(),
+  "hasAcceptedAnswer": zod.boolean(),
+  "isFeatured": zod.boolean(),
+  "status": zod.enum(['published', 'pending_review', 'suspended']),
   "myVote": zod.number().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string()

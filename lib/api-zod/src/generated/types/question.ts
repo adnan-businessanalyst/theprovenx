@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CategoryRef } from './categoryRef';
+import type { QuestionStatus } from './questionStatus';
 import type { User } from './user';
 
 export interface Question {
@@ -22,6 +23,7 @@ export interface Question {
   viewCount: number;
   hasAcceptedAnswer: boolean;
   isFeatured: boolean;
+  status: QuestionStatus;
   /** @nullable */
   myVote?: number | null;
   createdAt: string;

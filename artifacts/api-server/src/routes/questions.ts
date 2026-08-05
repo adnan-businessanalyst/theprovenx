@@ -1,4 +1,3 @@
-import { Router, type IRouter } from "express";
 import { and, desc, asc, eq, inArray, sql, ne } from "drizzle-orm";
 import {
   db,
@@ -25,6 +24,9 @@ import {
 import { applyVote } from "../lib/voting";
 import { notifyUser } from "../lib/notify";
 import { askLimiter, writeLimiter, voteLimiter } from "../lib/rateLimits";
+import { getSiteSettings } from "../lib/ensureDefaults";
+import type { User } from "@workspace/db";
+import { Router, type IRouter } from "express";
 
 const router: IRouter = Router();
 
@@ -35,6 +37,16 @@ function slugify(title: string): string {
     .replace(/^-+|-+$/g, "")
     .slice(0, 80);
   return `${base || "question"}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function isStaff(user?: User | null): boolean {
+  return user?.role === "admin" || user?.role === "platform_owner";
+}
+
+function canViewNonPublic(question: { authorId: number; status: string }, user?: User | null): boolean {
+  if (question.status === "published") return true;
+  if (!user) return false;
+  return question.authorId === user.id || isStaff(user);
 }
 
 async function ensureTags(names: string[]): Promise<number[]> {
@@ -63,6 +75,11 @@ async function ensureTags(names: string[]): Promise<number[]> {
   return [...new Set(ids)];
 }
 
+const publishedVisible = and(
+  eq(questionsTable.isDeleted, false),
+  eq(questionsTable.status, "published"),
+);
+
 router.get("/questions", async (req, res): Promise<void> => {
   const parsed = ListQuestionsQueryParams.safeParse(req.query);
   if (!parsed.success) {
@@ -72,7 +89,7 @@ router.get("/questions", async (req, res): Promise<void> => {
   const { sort = "newest", tag, category, page = 1, pageSize = 20 } = parsed.data;
   const size = Math.min(pageSize, 50);
 
-  const conditions = [eq(questionsTable.isDeleted, false)];
+  const conditions = [eq(questionsTable.isDeleted, false), eq(questionsTable.status, "published")];
   if (category) {
     const [categoryRow] = await db
       .select()
@@ -141,7 +158,7 @@ router.get("/questions/featured", async (req, res): Promise<void> => {
   const rows = await db
     .select()
     .from(questionsTable)
-    .where(and(eq(questionsTable.isFeatured, true), eq(questionsTable.isDeleted, false)))
+    .where(and(eq(questionsTable.isFeatured, true), publishedVisible))
     .orderBy(desc(questionsTable.updatedAt))
     .limit(5);
   res.json(await serializeQuestions(rows, req.localUser?.id));
@@ -165,6 +182,10 @@ router.post("/questions", requireAuth, askLimiter, async (req, res): Promise<voi
     res.status(400).json({ message: "Unknown category" });
     return;
   }
+
+  const settings = await getSiteSettings();
+  const status = settings.questionsRequireReview ? "pending_review" : "published";
+
   const [question] = await db
     .insert(questionsTable)
     .values({
@@ -174,10 +195,13 @@ router.post("/questions", requireAuth, askLimiter, async (req, res): Promise<voi
       language: parsed.data.language ?? "en",
       authorId: req.localUser!.id,
       categoryId: categoryRow.id,
+      status,
     })
     .returning();
 
-  const tagIds = await ensureTags(parsed.data.tags);
+  const rawTags =
+    categoryRow.slug === "other" ? (parsed.data.tags ?? []).slice(0, 1) : [];
+  const tagIds = await ensureTags(rawTags);
   if (tagIds.length > 0) {
     await db
       .insert(questionTagsTable)
@@ -195,17 +219,18 @@ router.get("/questions/:slug", async (req, res): Promise<void> => {
     .select()
     .from(questionsTable)
     .where(and(eq(questionsTable.slug, slug), eq(questionsTable.isDeleted, false)));
-  if (!question) {
+  if (!question || !canViewNonPublic(question, req.localUser)) {
     res.status(404).json({ message: "Question not found" });
     return;
   }
 
-  // Count the view (fire-and-forget semantics but awaited for simplicity)
-  await db
-    .update(questionsTable)
-    .set({ viewCount: sql`${questionsTable.viewCount} + 1`, updatedAt: question.updatedAt })
-    .where(eq(questionsTable.id, question.id));
-  question.viewCount += 1;
+  if (question.status === "published") {
+    await db
+      .update(questionsTable)
+      .set({ viewCount: sql`${questionsTable.viewCount} + 1`, updatedAt: question.updatedAt })
+      .where(eq(questionsTable.id, question.id));
+    question.viewCount += 1;
+  }
 
   const answers = await db
     .select()
@@ -263,7 +288,7 @@ router.post("/questions/:id/vote", requireAuth, voteLimiter, async (req, res): P
   const [question] = await db
     .select()
     .from(questionsTable)
-    .where(and(eq(questionsTable.id, id), eq(questionsTable.isDeleted, false)));
+    .where(and(eq(questionsTable.id, id), publishedVisible));
   if (!question) {
     res.status(404).json({ message: "Question not found" });
     return;
@@ -296,7 +321,7 @@ router.post("/questions/:id/answers", requireAuth, writeLimiter, async (req, res
   const [question] = await db
     .select()
     .from(questionsTable)
-    .where(and(eq(questionsTable.id, id), eq(questionsTable.isDeleted, false)));
+    .where(and(eq(questionsTable.id, id), publishedVisible));
   if (!question) {
     res.status(404).json({ message: "Question not found" });
     return;
@@ -310,7 +335,6 @@ router.post("/questions/:id/answers", requireAuth, writeLimiter, async (req, res
       language: parsed.data.language ?? "en",
     })
     .returning();
-  // bump question activity
   await db
     .update(questionsTable)
     .set({ updatedAt: new Date() })
@@ -362,7 +386,7 @@ router.get("/questions/:id/related", async (req, res): Promise<void> => {
     .where(
       and(
         inArray(questionsTable.id, relatedIds.map((r) => r.id)),
-        eq(questionsTable.isDeleted, false),
+        publishedVisible,
       ),
     )
     .orderBy(desc(questionsTable.score))

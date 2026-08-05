@@ -168,6 +168,9 @@ export default function QuestionDetail({ slug }: { slug: string }) {
   const { question, answers, comments } = qDetail;
   const acceptedAnswer = answers.find(a => a.isAccepted);
   const isAuthor = me?.id === question.author.id;
+  const isStaff = me?.role === "admin" || me?.role === "platform_owner";
+  const showModerationStatus =
+    question.status !== "published" && (isAuthor || isStaff);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -181,7 +184,7 @@ export default function QuestionDetail({ slug }: { slug: string }) {
       "dateCreated": question.createdAt,
       "author": {
         "@type": "Person",
-        "name": question.author.displayName
+        "name": question.author.username
       },
       "acceptedAnswer": acceptedAnswer ? {
         "@type": "Answer",
@@ -223,6 +226,14 @@ export default function QuestionDetail({ slug }: { slug: string }) {
                 </Badge>
               </Link>
             )}
+            {showModerationStatus ? (
+              <Badge
+                variant={question.status === "suspended" ? "destructive" : "secondary"}
+                className="rounded-full"
+              >
+                {question.status === "pending_review" ? "Pending review" : "Suspended"}
+              </Badge>
+            ) : null}
             <span className="flex items-center gap-1.5"><span className="opacity-70">Asked</span> <span className="font-medium text-foreground">{formatDistanceToNow(new Date(question.createdAt), { addSuffix: true })}</span></span>
             <span className="flex items-center gap-1.5"><span className="opacity-70">Viewed</span> <span className="font-medium text-foreground">{question.viewCount} times</span></span>
             <TranslationToggle 
@@ -266,11 +277,16 @@ export default function QuestionDetail({ slug }: { slug: string }) {
               <div className="p-3 bg-card border rounded-lg flex items-center gap-3 w-full sm:w-auto">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={question.author.avatarUrl || undefined} />
-                  <AvatarFallback>{question.author.displayName.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>{question.author.username.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div>
                   <div className="text-xs text-muted-foreground">Asked by</div>
-                  <div className="text-sm font-medium">{question.author.displayName}</div>
+                  <Link
+                    href={`/users/${question.author.username}`}
+                    className="text-sm font-medium hover:text-primary transition-colors"
+                  >
+                    @{question.author.username}
+                  </Link>
                 </div>
               </div>
             </div>

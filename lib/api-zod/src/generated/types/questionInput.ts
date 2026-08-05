@@ -18,10 +18,11 @@ export interface QuestionInput {
      */
   body: string;
   /**
-     * @minItems 1
-     * @maxItems 5
+     * Optional; only used when categorySlug is "other"
+     * @minItems 0
+     * @maxItems 1
      */
-  tags: string[];
+  tags?: string[];
   /** @minLength 1 */
   categorySlug: string;
   language?: string;

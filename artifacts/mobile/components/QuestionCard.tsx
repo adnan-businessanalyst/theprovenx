@@ -60,9 +60,9 @@ export function QuestionCard({ question }: { question: Question }) {
 
       <View style={styles.metaRow}>
         <View style={styles.authorRow}>
-          <Avatar name={question.author.displayName} size={22} />
+          <Avatar name={question.author.username} size={22} />
           <Text style={{ color: colors.mutedForeground, fontFamily: fonts.medium, fontSize: 12 }} numberOfLines={1}>
-            {question.author.displayName} · {timeAgo(question.createdAt)}
+            @{question.author.username} · {timeAgo(question.createdAt)}
           </Text>
         </View>
         <View style={styles.statsRow}>

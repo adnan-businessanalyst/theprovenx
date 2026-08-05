@@ -11,7 +11,7 @@ router.get("/tags", async (_req, res): Promise<void> => {
       slug: tagsTable.slug,
       name: tagsTable.name,
       description: tagsTable.description,
-      questionCount: sql<number>`count(${questionsTable.id}) filter (where ${questionsTable.isDeleted} = false)::int`,
+      questionCount: sql<number>`count(${questionsTable.id}) filter (where ${questionsTable.isDeleted} = false and ${questionsTable.status} = 'published')::int`,
     })
     .from(tagsTable)
     .leftJoin(questionTagsTable, eq(questionTagsTable.tagId, tagsTable.id))

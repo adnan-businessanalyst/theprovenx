@@ -136,6 +136,15 @@ export interface CategoryRef {
   name: string;
 }
 
+export type QuestionStatus = typeof QuestionStatus[keyof typeof QuestionStatus];
+
+
+export const QuestionStatus = {
+  published: 'published',
+  pending_review: 'pending_review',
+  suspended: 'suspended',
+} as const;
+
 export interface Question {
   id: number;
   slug: string;
@@ -150,6 +159,7 @@ export interface Question {
   viewCount: number;
   hasAcceptedAnswer: boolean;
   isFeatured: boolean;
+  status: QuestionStatus;
   /** @nullable */
   myVote?: number | null;
   createdAt: string;
@@ -267,10 +277,11 @@ export interface QuestionInput {
      */
   body: string;
   /**
-     * @minItems 1
-     * @maxItems 5
+     * Optional; only used when categorySlug is "other"
+     * @minItems 0
+     * @maxItems 1
      */
-  tags: string[];
+  tags?: string[];
   /** @minLength 1 */
   categorySlug: string;
   language?: string;
@@ -278,8 +289,26 @@ export interface QuestionInput {
   website?: string;
 }
 
-export interface QuestionFeatureUpdate {
-  isFeatured: boolean;
+export type QuestionAdminUpdateStatus = typeof QuestionAdminUpdateStatus[keyof typeof QuestionAdminUpdateStatus];
+
+
+export const QuestionAdminUpdateStatus = {
+  published: 'published',
+  pending_review: 'pending_review',
+  suspended: 'suspended',
+} as const;
+
+export interface QuestionAdminUpdate {
+  isFeatured?: boolean;
+  status?: QuestionAdminUpdateStatus;
+}
+
+export interface SiteSettings {
+  questionsRequireReview: boolean;
+}
+
+export interface SiteSettingsUpdate {
+  questionsRequireReview: boolean;
 }
 
 export interface AnswerInput {
@@ -660,4 +689,19 @@ export const ListSponsorInquiriesAdminStatus = {
 export type ListUsersAdminParams = {
 q?: string;
 };
+
+export type ListQuestionsAdminParams = {
+status?: ListQuestionsAdminStatus;
+page?: number;
+pageSize?: number;
+};
+
+export type ListQuestionsAdminStatus = typeof ListQuestionsAdminStatus[keyof typeof ListQuestionsAdminStatus];
+
+
+export const ListQuestionsAdminStatus = {
+  published: 'published',
+  pending_review: 'pending_review',
+  suspended: 'suspended',
+} as const;
 

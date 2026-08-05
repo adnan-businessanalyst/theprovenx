@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db, questionsTable, tagsTable } from "@workspace/db";
 
 const router: IRouter = Router();
@@ -12,7 +12,9 @@ router.get("/sitemap.xml", async (req, res): Promise<void> => {
   const questions = await db
     .select({ slug: questionsTable.slug, updatedAt: questionsTable.updatedAt })
     .from(questionsTable)
-    .where(eq(questionsTable.isDeleted, false))
+    .where(
+      and(eq(questionsTable.isDeleted, false), eq(questionsTable.status, "published")),
+    )
     .orderBy(desc(questionsTable.updatedAt))
     .limit(5000);
   const tags = await db.select({ slug: tagsTable.slug }).from(tagsTable);

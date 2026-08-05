@@ -6,6 +6,6 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface QuestionFeatureUpdate {
-  isFeatured: boolean;
+export interface SiteSettingsUpdate {
+  questionsRequireReview: boolean;
 }

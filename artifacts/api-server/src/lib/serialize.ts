@@ -37,7 +37,13 @@ export async function serializeUsers(users: User[]): Promise<Map<number, ApiUser
   const qCounts = await db
     .select({ authorId: questionsTable.authorId, count: sql<number>`count(*)::int` })
     .from(questionsTable)
-    .where(and(inArray(questionsTable.authorId, ids), eq(questionsTable.isDeleted, false)))
+    .where(
+      and(
+        inArray(questionsTable.authorId, ids),
+        eq(questionsTable.isDeleted, false),
+        eq(questionsTable.status, "published"),
+      ),
+    )
     .groupBy(questionsTable.authorId);
   const aCounts = await db
     .select({
@@ -148,6 +154,7 @@ export async function serializeQuestions(
     viewCount: q.viewCount,
     hasAcceptedAnswer: q.acceptedAnswerId != null,
     isFeatured: q.isFeatured,
+    status: q.status,
     myVote: voteMap.get(q.id) ?? null,
     createdAt: q.createdAt.toISOString(),
     updatedAt: q.updatedAt.toISOString(),

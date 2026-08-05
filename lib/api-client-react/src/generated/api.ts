@@ -39,6 +39,7 @@ import type {
   ForgotPasswordInput,
   HealthStatus,
   ListNotificationsParams,
+  ListQuestionsAdminParams,
   ListQuestionsParams,
   ListSponsorInquiriesAdminParams,
   ListTopUsersParams,
@@ -47,13 +48,15 @@ import type {
   NotificationList,
   NotificationReadInput,
   Question,
+  QuestionAdminUpdate,
   QuestionDetail,
-  QuestionFeatureUpdate,
   QuestionInput,
   QuestionList,
   RegisterInput,
   ResetPasswordInput,
   SearchQuestionsParams,
+  SiteSettings,
+  SiteSettingsUpdate,
   SponsorInquiry,
   SponsorInquiryInput,
   SponsorInquiryStatusUpdate,
@@ -3107,6 +3110,238 @@ export const useUpdateUserAdmin = <TError = ErrorType<unknown>,
       return useMutation(getUpdateUserAdminMutationOptions(options));
     }
 
+export const getGetAdminSettingsUrl = () => {
+
+
+
+
+  return `/api/admin/settings`
+}
+
+/**
+ * @summary Get site settings
+ */
+export const getAdminSettings = async ( options?: RequestInit): Promise<SiteSettings> => {
+
+  return customFetch<SiteSettings>(getGetAdminSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAdminSettingsQueryKey = () => {
+    return [
+    `/api/admin/settings`
+    ] as const;
+    }
+
+
+export const getGetAdminSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getAdminSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminSettings>>> = ({ signal }) => getAdminSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAdminSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminSettings>>>
+export type GetAdminSettingsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get site settings
+ */
+
+export function useGetAdminSettings<TData = Awaited<ReturnType<typeof getAdminSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAdminSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateAdminSettingsUrl = () => {
+
+
+
+
+  return `/api/admin/settings`
+}
+
+/**
+ * @summary Update site settings
+ */
+export const updateAdminSettings = async (siteSettingsUpdate: SiteSettingsUpdate, options?: RequestInit): Promise<SiteSettings> => {
+
+  return customFetch<SiteSettings>(getUpdateAdminSettingsUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(siteSettingsUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateAdminSettingsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminSettings>>, TError,{data: BodyType<SiteSettingsUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAdminSettings>>, TError,{data: BodyType<SiteSettingsUpdate>}, TContext> => {
+
+const mutationKey = ['updateAdminSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAdminSettings>>, {data: BodyType<SiteSettingsUpdate>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateAdminSettings(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAdminSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof updateAdminSettings>>>
+    export type UpdateAdminSettingsMutationBody = BodyType<SiteSettingsUpdate>
+    export type UpdateAdminSettingsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update site settings
+ */
+export const useUpdateAdminSettings = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminSettings>>, TError,{data: BodyType<SiteSettingsUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAdminSettings>>,
+        TError,
+        {data: BodyType<SiteSettingsUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateAdminSettingsMutationOptions(options));
+    }
+
+export const getListQuestionsAdminUrl = (params?: ListQuestionsAdminParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/questions?${stringifiedParams}` : `/api/admin/questions`
+}
+
+/**
+ * @summary List all questions for moderation
+ */
+export const listQuestionsAdmin = async (params?: ListQuestionsAdminParams, options?: RequestInit): Promise<QuestionList> => {
+
+  return customFetch<QuestionList>(getListQuestionsAdminUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListQuestionsAdminQueryKey = (params?: ListQuestionsAdminParams,) => {
+    return [
+    `/api/admin/questions`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListQuestionsAdminQueryOptions = <TData = Awaited<ReturnType<typeof listQuestionsAdmin>>, TError = ErrorType<unknown>>(params?: ListQuestionsAdminParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listQuestionsAdmin>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListQuestionsAdminQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listQuestionsAdmin>>> = ({ signal }) => listQuestionsAdmin(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listQuestionsAdmin>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListQuestionsAdminQueryResult = NonNullable<Awaited<ReturnType<typeof listQuestionsAdmin>>>
+export type ListQuestionsAdminQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all questions for moderation
+ */
+
+export function useListQuestionsAdmin<TData = Awaited<ReturnType<typeof listQuestionsAdmin>>, TError = ErrorType<unknown>>(
+ params?: ListQuestionsAdminParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listQuestionsAdmin>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListQuestionsAdminQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getDeleteQuestionAdminUrl = (id: number,) => {
 
 
@@ -3178,7 +3413,7 @@ export const useDeleteQuestionAdmin = <TError = ErrorType<unknown>,
       return useMutation(getDeleteQuestionAdminMutationOptions(options));
     }
 
-export const getFeatureQuestionAdminUrl = (id: number,) => {
+export const getUpdateQuestionAdminUrl = (id: number,) => {
 
 
 
@@ -3187,17 +3422,17 @@ export const getFeatureQuestionAdminUrl = (id: number,) => {
 }
 
 /**
- * @summary Pin/unpin (feature) a question
+ * @summary Update question moderation fields (status, featured)
  */
-export const featureQuestionAdmin = async (id: number,
-    questionFeatureUpdate: QuestionFeatureUpdate, options?: RequestInit): Promise<Question> => {
+export const updateQuestionAdmin = async (id: number,
+    questionAdminUpdate: QuestionAdminUpdate, options?: RequestInit): Promise<Question> => {
 
-  return customFetch<Question>(getFeatureQuestionAdminUrl(id),
+  return customFetch<Question>(getUpdateQuestionAdminUrl(id),
   {
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(questionFeatureUpdate)
+    body: JSON.stringify(questionAdminUpdate)
   }
 );}
 
@@ -3205,11 +3440,11 @@ export const featureQuestionAdmin = async (id: number,
 
 
 
-export const getFeatureQuestionAdminMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof featureQuestionAdmin>>, TError,{id: number;data: BodyType<QuestionFeatureUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof featureQuestionAdmin>>, TError,{id: number;data: BodyType<QuestionFeatureUpdate>}, TContext> => {
+export const getUpdateQuestionAdminMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateQuestionAdmin>>, TError,{id: number;data: BodyType<QuestionAdminUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateQuestionAdmin>>, TError,{id: number;data: BodyType<QuestionAdminUpdate>}, TContext> => {
 
-const mutationKey = ['featureQuestionAdmin'];
+const mutationKey = ['updateQuestionAdmin'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -3219,10 +3454,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof featureQuestionAdmin>>, {id: number;data: BodyType<QuestionFeatureUpdate>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateQuestionAdmin>>, {id: number;data: BodyType<QuestionAdminUpdate>}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  featureQuestionAdmin(id,data,requestOptions)
+          return  updateQuestionAdmin(id,data,requestOptions)
         }
 
 
@@ -3232,22 +3467,22 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type FeatureQuestionAdminMutationResult = NonNullable<Awaited<ReturnType<typeof featureQuestionAdmin>>>
-    export type FeatureQuestionAdminMutationBody = BodyType<QuestionFeatureUpdate>
-    export type FeatureQuestionAdminMutationError = ErrorType<unknown>
+    export type UpdateQuestionAdminMutationResult = NonNullable<Awaited<ReturnType<typeof updateQuestionAdmin>>>
+    export type UpdateQuestionAdminMutationBody = BodyType<QuestionAdminUpdate>
+    export type UpdateQuestionAdminMutationError = ErrorType<unknown>
 
     /**
- * @summary Pin/unpin (feature) a question
+ * @summary Update question moderation fields (status, featured)
  */
-export const useFeatureQuestionAdmin = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof featureQuestionAdmin>>, TError,{id: number;data: BodyType<QuestionFeatureUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useUpdateQuestionAdmin = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateQuestionAdmin>>, TError,{id: number;data: BodyType<QuestionAdminUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof featureQuestionAdmin>>,
+        Awaited<ReturnType<typeof updateQuestionAdmin>>,
         TError,
-        {id: number;data: BodyType<QuestionFeatureUpdate>},
+        {id: number;data: BodyType<QuestionAdminUpdate>},
         TContext
       > => {
-      return useMutation(getFeatureQuestionAdminMutationOptions(options));
+      return useMutation(getUpdateQuestionAdminMutationOptions(options));
     }
 
 export const getDeleteAnswerAdminUrl = (id: number,) => {

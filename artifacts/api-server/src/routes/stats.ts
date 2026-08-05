@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db, questionsTable, answersTable, usersTable } from "@workspace/db";
 
 const router: IRouter = Router();
@@ -11,7 +11,9 @@ router.get("/stats/summary", async (_req, res): Promise<void> => {
       answeredCount: sql<number>`count(*) filter (where exists (select 1 from answers a where a.question_id = ${questionsTable.id} and a.is_deleted = false))::int`,
     })
     .from(questionsTable)
-    .where(eq(questionsTable.isDeleted, false));
+    .where(
+      and(eq(questionsTable.isDeleted, false), eq(questionsTable.status, "published")),
+    );
   const [{ answerCount }] = await db
     .select({ answerCount: sql<number>`count(*)::int` })
     .from(answersTable)

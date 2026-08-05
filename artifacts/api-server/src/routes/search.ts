@@ -15,7 +15,10 @@ router.get("/search", async (req, res): Promise<void> => {
   const { q, tag, unanswered, page = 1, pageSize = 20 } = parsed.data;
   const size = Math.min(pageSize, 50);
 
-  const conditions = [eq(questionsTable.isDeleted, false)];
+  const conditions = [
+    eq(questionsTable.isDeleted, false),
+    eq(questionsTable.status, "published"),
+  ];
   if (q && q.trim()) {
     conditions.push(
       sql`to_tsvector('simple', ${questionsTable.title} || ' ' || ${questionsTable.body}) @@ websearch_to_tsquery('simple', ${q.trim()})`,

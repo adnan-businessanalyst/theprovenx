@@ -11,7 +11,7 @@ router.get("/categories", async (_req, res): Promise<void> => {
       slug: categoriesTable.slug,
       name: categoriesTable.name,
       description: categoriesTable.description,
-      questionCount: sql<number>`count(${questionsTable.id}) filter (where ${questionsTable.isDeleted} = false)::int`,
+      questionCount: sql<number>`count(${questionsTable.id}) filter (where ${questionsTable.isDeleted} = false and ${questionsTable.status} = 'published')::int`,
     })
     .from(categoriesTable)
     .leftJoin(questionsTable, eq(questionsTable.categoryId, categoriesTable.id))

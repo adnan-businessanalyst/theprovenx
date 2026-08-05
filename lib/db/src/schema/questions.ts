@@ -30,6 +30,8 @@ export const questionsTable = pgTable(
     }),
     isFeatured: boolean("is_featured").notNull().default(false),
     isDeleted: boolean("is_deleted").notNull().default(false),
+    /** published | pending_review | suspended */
+    status: text("status").notNull().default("published"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -45,8 +47,17 @@ export const questionsTable = pgTable(
     ),
     index("questions_author_idx").on(t.authorId),
     index("questions_created_idx").on(t.createdAt),
+    index("questions_status_idx").on(t.status),
   ],
 );
+
+export const QUESTION_STATUSES = [
+  "published",
+  "pending_review",
+  "suspended",
+] as const;
+
+export type QuestionStatus = (typeof QUESTION_STATUSES)[number];
 
 export type Question = typeof questionsTable.$inferSelect;
 export type InsertQuestion = typeof questionsTable.$inferInsert;

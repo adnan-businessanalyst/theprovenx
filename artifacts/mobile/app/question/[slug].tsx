@@ -112,9 +112,9 @@ export default function QuestionDetailScreen() {
       </BrandText>
 
       <View style={styles.metaRow}>
-        <Avatar name={question.author.displayName} size={26} />
+        <Avatar name={question.author.username} size={26} />
         <Text style={{ color: colors.mutedForeground, fontFamily: fonts.medium, fontSize: 13, flex: 1 }}>
-          {question.author.displayName} · {timeAgo(question.createdAt)} · {compactNumber(question.viewCount)} views
+          @{question.author.username} · {timeAgo(question.createdAt)} · {compactNumber(question.viewCount)} views
         </Text>
       </View>
 

@@ -13,3 +13,4 @@ export * from "./notifications";
 export * from "./translations";
 export * from "./transactions";
 export * from "./sponsorInquiries";
+export * from "./siteSettings";

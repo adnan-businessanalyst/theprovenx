@@ -72,9 +72,9 @@ export default function QuestionCard({ question }: { question: Question }) {
               <Link href={`/users/${question.author.username}`} className="flex items-center gap-1.5 hover:text-foreground transition-colors">
                 <Avatar className="h-5 w-5">
                   <AvatarImage src={question.author.avatarUrl || undefined} />
-                  <AvatarFallback className="text-[8px]">{question.author.displayName.charAt(0)}</AvatarFallback>
+                  <AvatarFallback className="text-[8px]">{question.author.username.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <span className="font-medium text-foreground">{question.author.displayName}</span>
+                <span className="font-medium text-foreground">@{question.author.username}</span>
               </Link>
               <span className="opacity-50">•</span>
               <span>{formatDistanceToNow(new Date(question.createdAt), { addSuffix: true })}</span>
