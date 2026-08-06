@@ -117,9 +117,9 @@ export default function Layout({ children }: { children: ReactNode }) {
     >
       <div
         className={cn(
-          "sticky top-3 sm:top-4 z-50 w-full px-2 sm:px-4 transition-all duration-300",
+          "relative z-40 w-full px-2 sm:px-4 pt-3 sm:pt-4 transition-all duration-300",
           usesScrollSwapNav && pageScrolled &&
-            "opacity-0 -translate-y-4 pointer-events-none h-0 overflow-hidden !px-0 m-0",
+            "opacity-0 -translate-y-4 pointer-events-none h-0 overflow-hidden !px-0 !pt-0 m-0",
         )}
         aria-hidden={usesScrollSwapNav && pageScrolled}
       >
@@ -217,17 +217,6 @@ export default function Layout({ children }: { children: ReactNode }) {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Link
-                href="/ask"
-                aria-hidden={!askVisible}
-                tabIndex={askVisible ? undefined : -1}
-                onAnimationEnd={() => setBouncing(false)}
-                className={`inline-flex px-3 sm:px-5 py-2 bg-primary text-primary-foreground font-medium rounded-full shadow-sm hover:shadow-md hover:bg-primary/90 transition-all items-center gap-1.5 text-sm ${askVisible ? (bouncing ? "animate-ask-bounce" : "") : "invisible pointer-events-none"}`}
-              >
-                <span className="hidden sm:inline">{t("nav.ask")}</span>
-                <span className="sm:hidden text-lg leading-none mb-[2px]">+</span>
-              </Link>
-
               <NavAuthGate />
               
               {/* Mobile menu */}
@@ -260,6 +249,23 @@ export default function Layout({ children }: { children: ReactNode }) {
           </div>
         </header>
       </div>
+
+      {/* Sticky Ask CTA — on home, only after scrolling past the hero */}
+      <Link
+        href="/ask"
+        aria-hidden={!askVisible}
+        tabIndex={askVisible ? undefined : -1}
+        onAnimationEnd={() => setBouncing(false)}
+        className={cn(
+          "fixed z-50 top-3 end-3 sm:top-4 sm:end-4 inline-flex px-3 sm:px-5 py-2 bg-primary text-primary-foreground font-medium rounded-full shadow-md hover:shadow-lg hover:bg-primary/90 transition-all duration-300 items-center gap-1.5 text-sm",
+          askVisible
+            ? cn("opacity-100 translate-y-0 pointer-events-auto", bouncing && "animate-ask-bounce")
+            : "opacity-0 -translate-y-2 pointer-events-none",
+        )}
+      >
+        <span className="hidden sm:inline">{t("nav.ask")}</span>
+        <span className="sm:hidden text-lg leading-none mb-[2px]">+</span>
+      </Link>
 
       {isWhoWeArePage || isHome ? (
         <div className="flex-1">{children}</div>
