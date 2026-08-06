@@ -209,31 +209,32 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsla(45,95%,50%,0.18),_transparent_55%)] -z-10" />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto text-center flex flex-col items-center gap-4 sm:gap-6 md:gap-8">
-          <div className="hero-actions flex flex-row items-stretch justify-center gap-2 sm:gap-3 w-full max-w-[min(100%,20rem)] sm:max-w-sm md:max-w-md mx-auto">
-            <div className="hero-action-ask flex-1 min-w-0">
+          <div className="hero-actions flex flex-row items-center justify-center gap-2 sm:gap-3 w-full max-w-[18rem] sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto px-1">
+            <div className="hero-action-ask min-w-0 flex-[1_1_auto]">
               <Button
                 asChild
                 variant="outline"
-                className="hero-action-ask-btn w-full rounded-full px-2 sm:px-5 h-12 sm:h-16 md:h-20 lg:h-[6.25rem] bg-transparent hover:bg-primary/10 border-2 border-primary text-primary hover:text-primary font-bold text-[0.7rem] sm:text-sm md:text-base lg:text-lg shadow-none leading-tight"
+                className="hero-action-ask-btn w-full rounded-full px-4 sm:px-6 h-12 sm:h-14 md:h-16 lg:h-20 bg-transparent hover:bg-primary/10 border-2 border-primary text-primary hover:text-primary font-bold text-sm sm:text-base md:text-lg shadow-none"
               >
-                <Link href="/ask" className="whitespace-normal sm:whitespace-nowrap text-center">
+                <Link href="/ask" className="whitespace-nowrap text-center">
                   {t("nav.ask")}
                 </Link>
               </Button>
             </div>
-            <div className="hero-action-search flex-1 min-w-0">
+            <div className="hero-action-search shrink-0">
               <Button
                 type="button"
                 variant="outline"
+                size="icon"
                 onClick={() => setLocation("/search")}
-                className="hero-action-search-input w-full h-12 sm:h-16 md:h-20 lg:h-[6.25rem] rounded-full bg-transparent hover:bg-secondary/10 border-2 border-secondary text-secondary hover:text-secondary shadow-none"
+                className="hero-action-search-input h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 lg:h-20 lg:w-20 rounded-full p-0 bg-transparent hover:bg-secondary/10 border-2 border-secondary text-secondary hover:text-secondary shadow-none [&_svg]:!size-[1.35rem] sm:[&_svg]:!size-[1.65rem] md:[&_svg]:!size-8 lg:[&_svg]:!size-10"
                 aria-label={t("nav.search")}
               >
-                <Search className="size-7 sm:size-10 md:size-12 lg:size-[5.25rem]" strokeWidth={1.75} />
+                <Search strokeWidth={1.75} />
               </Button>
             </div>
           </div>
-          <div className="hero-title-stage w-full max-w-full overflow-hidden px-0.5">
+          <div className="hero-title-stage w-full max-w-full overflow-visible px-0.5 pt-1">
             <HeroTitle />
           </div>
         </div>
