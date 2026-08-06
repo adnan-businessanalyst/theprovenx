@@ -148,14 +148,13 @@ export function ProvenVideo() {
   const [muted, setMuted] = useState(true);
 
   const headlineLabel = t("how_it_works.headline");
-  const [eyebrowChars, headlineChars, mutedChars] = useMemo(
+  const [eyebrowChars, mutedChars] = useMemo(
     () =>
       assignRevealOrder([
         charsFromParts(EYEBROW_PARTS),
-        charsFromParts([{ text: headlineLabel, tone: "headline" }]),
         charsFromParts(MUTED_PARTS),
       ]),
-    [headlineLabel],
+    [],
   );
 
   useEffect(() => {
@@ -273,13 +272,7 @@ export function ProvenVideo() {
             chars={eyebrowChars}
             label={EYEBROW_FULL}
           />
-          <TypedLine
-            as="h2"
-            className="proven-video-headline"
-            active={inView}
-            chars={headlineChars}
-            label={headlineLabel}
-          />
+          <h2 className="proven-video-headline">{headlineLabel}</h2>
           <TypedLine
             as="p"
             className="proven-video-muted"
