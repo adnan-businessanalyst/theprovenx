@@ -219,17 +219,29 @@ export function ProvenVideo() {
     const video = videoRef.current;
     if (!video) return;
     video.muted = muted;
+    video.loop = true;
   }, [muted]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
+    video.loop = true;
+
+    const restart = () => {
+      video.currentTime = 0;
+      void video.play().catch(() => setPlaying(false));
+    };
+
+    video.addEventListener("ended", restart);
+
     if (inView && phase === "full" && playing) {
       void video.play().catch(() => setPlaying(false));
     } else if (!inView || phase !== "full" || !playing) {
       video.pause();
     }
+
+    return () => video.removeEventListener("ended", restart);
   }, [inView, phase, playing]);
 
   const togglePlay = () => setPlaying((prev) => !prev);
@@ -301,7 +313,7 @@ export function ProvenVideo() {
                 ref={videoRef}
                 className="absolute inset-0 h-full w-full object-cover object-center bg-black [&::-webkit-media-controls]:hidden [&::-webkit-media-controls-enclosure]:hidden"
                 autoPlay
-                loop
+                loop={true}
                 muted
                 playsInline
                 preload="auto"
