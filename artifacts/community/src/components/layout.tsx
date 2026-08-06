@@ -54,6 +54,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const isHome = pathname === "/";
   // On home, stay hidden until the hero has been measured and scrolled past.
   const askVisible = isHome ? heroVisible === false : true;
+  const navOverHero = isHome && heroVisible !== false;
   const [bouncing, setBouncing] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const isProductsPage = pathname === "/products";
@@ -122,7 +123,14 @@ export default function Layout({ children }: { children: ReactNode }) {
         )}
         aria-hidden={usesScrollSwapNav && pageScrolled}
       >
-        <header className="mx-auto max-w-6xl rounded-full border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-md transition-all">
+        <header
+          className={cn(
+            "mx-auto max-w-6xl rounded-full border-0 transition-all duration-300",
+            navOverHero
+              ? "bg-transparent shadow-none backdrop-blur-0"
+              : "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-md",
+          )}
+        >
           <div className="px-6 flex h-16 items-center gap-4">
             {/* Logo */}
             <Link href="/" className="flex items-center mr-2 hover-elevate rounded-full px-1 py-0.5 transition-all shrink-0">
@@ -134,19 +142,33 @@ export default function Layout({ children }: { children: ReactNode }) {
             </Link>
 
             {/* Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1 text-sm font-medium text-muted-foreground mr-auto">
-              <Link href="/who-we-are" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.who_we_are")}</Link>
-              <Link href="/about" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.about")}</Link>
-              <Link href="/products" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.products")}</Link>
-              <Link href="/blog" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.blog")}</Link>
-              <Link href="/contributors" className="px-4 py-2 rounded-full hover:text-foreground hover:bg-muted/80 transition-colors">{t("nav.contributors")}</Link>
+            <nav
+              className={cn(
+                "hidden md:flex items-center gap-1 text-sm font-medium mr-auto",
+                navOverHero ? "text-white/85" : "text-muted-foreground",
+              )}
+            >
+              <Link href="/who-we-are" className={cn("px-4 py-2 rounded-full transition-colors", navOverHero ? "hover:text-white hover:bg-white/10" : "hover:text-foreground hover:bg-muted/80")}>{t("nav.who_we_are")}</Link>
+              <Link href="/about" className={cn("px-4 py-2 rounded-full transition-colors", navOverHero ? "hover:text-white hover:bg-white/10" : "hover:text-foreground hover:bg-muted/80")}>{t("nav.about")}</Link>
+              <Link href="/products" className={cn("px-4 py-2 rounded-full transition-colors", navOverHero ? "hover:text-white hover:bg-white/10" : "hover:text-foreground hover:bg-muted/80")}>{t("nav.products")}</Link>
+              <Link href="/blog" className={cn("px-4 py-2 rounded-full transition-colors", navOverHero ? "hover:text-white hover:bg-white/10" : "hover:text-foreground hover:bg-muted/80")}>{t("nav.blog")}</Link>
+              <Link href="/contributors" className={cn("px-4 py-2 rounded-full transition-colors", navOverHero ? "hover:text-white hover:bg-white/10" : "hover:text-foreground hover:bg-muted/80")}>{t("nav.contributors")}</Link>
             </nav>
 
             <div className="flex-1 md:hidden"></div>
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="rounded-full hidden sm:flex" onClick={() => setSearchOpen(true)} aria-label={t("nav.search")}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "rounded-full hidden sm:flex",
+                  navOverHero && "text-white hover:text-white hover:bg-white/10",
+                )}
+                onClick={() => setSearchOpen(true)}
+                aria-label={t("nav.search")}
+              >
                 <SearchIcon className="h-4 w-4" />
               </Button>
 
@@ -171,7 +193,14 @@ export default function Layout({ children }: { children: ReactNode }) {
               {/* Language Switcher */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "rounded-full",
+                      navOverHero && "text-white hover:text-white hover:bg-white/10",
+                    )}
+                  >
                     <Globe className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -204,7 +233,14 @@ export default function Layout({ children }: { children: ReactNode }) {
               {/* Mobile menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild className="md:hidden">
-                  <Button variant="ghost" size="icon" className="rounded-full">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "rounded-full",
+                      navOverHero && "text-white hover:text-white hover:bg-white/10",
+                    )}
+                  >
                     <Menu className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -225,7 +261,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         </header>
       </div>
 
-      {isWhoWeArePage ? (
+      {isWhoWeArePage || isHome ? (
         <div className="flex-1">{children}</div>
       ) : (
         <main className="flex-1 container mx-auto max-w-6xl px-4 py-8">

@@ -15,7 +15,6 @@ import {
 } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   TrendingUp,
   Users,
@@ -28,6 +27,8 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProvenVideo } from "@/components/proven-video";
+import { HeroTitle } from "@/components/hero-title";
+import { Manifesto } from "@/components/manifesto";
 import {
   TopQuestions,
   type TopQuestionsSort,
@@ -171,17 +172,8 @@ export default function Home() {
 
   const { data: topVerifiers } = useListTopVerifiers();
 
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const q = fd.get("q") as string;
-    if (q) {
-      setLocation(`/search?q=${encodeURIComponent(q)}`);
-    }
-  };
-
   const heroRef = useRef<HTMLElement | null>(null);
-  const { setHeroVisible } = useHeroVisibility();
+  const { heroVisible, setHeroVisible } = useHeroVisibility();
 
   useEffect(() => {
     const el = heroRef.current;
@@ -208,49 +200,48 @@ export default function Home() {
     <>
       <section
         ref={heroRef}
-        className="w-[100vw] relative left-1/2 rtl:left-auto rtl:right-1/2 -translate-x-1/2 rtl:translate-x-1/2 mb-10 shadow-sm isolate flex items-center min-h-[280px] py-10 px-6"
+        className={`hero-section w-[100vw] relative left-1/2 rtl:left-auto rtl:right-1/2 -translate-x-1/2 rtl:translate-x-1/2 -mt-16 mb-10 shadow-sm isolate flex items-center justify-center h-[100dvh] min-h-[100dvh] pt-16 px-4 overflow-x-hidden ${
+          heroVisible !== false ? "is-in" : ""
+        }`}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-accent to-secondary -z-10" />
-        <div className="absolute inset-0 bg-background/10 backdrop-blur-[2px] -z-10" />
+        <div className="absolute inset-0 bg-[#101F38] -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/35 via-[#101F38] to-secondary/40 -z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsla(45,95%,50%,0.18),_transparent_55%)] -z-10" />
 
-        <div className="relative z-10 w-full max-w-4xl mx-auto text-center space-y-5">
-          <div className="flex justify-center">
-            <Button
-              asChild
-              className="rounded-full px-8 h-12 shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base border-2 border-white/40 hover:border-white/60 transition-all"
-            >
-              <Link href="/ask">{t("nav.ask")}</Link>
-            </Button>
+        <div className="relative z-10 w-full max-w-7xl mx-auto text-center space-y-8">
+          <div className="hero-actions flex flex-row items-stretch justify-center gap-3 w-full max-w-md mx-auto">
+            <div className="hero-action-ask flex-1 min-w-0">
+              <Button
+                asChild
+                variant="outline"
+                className="hero-action-ask-btn w-full rounded-full px-6 h-[6.25rem] bg-transparent hover:bg-primary/10 border-2 border-primary text-primary hover:text-primary font-bold text-base sm:text-lg shadow-none"
+              >
+                <Link href="/ask">{t("nav.ask")}</Link>
+              </Button>
+            </div>
+            <div className="hero-action-search flex-1 min-w-0">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setLocation("/search")}
+                className="hero-action-search-input w-full h-[6.25rem] rounded-full bg-transparent hover:bg-secondary/10 border-2 border-secondary text-secondary hover:text-secondary shadow-none"
+                aria-label={t("nav.search")}
+              >
+                <Search className="h-[5.25rem] w-[5.25rem]" strokeWidth={1.75} />
+              </Button>
+            </div>
           </div>
-          <Badge className="bg-white/20 text-white hover:bg-white/30 border-white/30 backdrop-blur-md px-4 py-1.5 rounded-full uppercase tracking-widest font-bold text-xs shadow-sm">
-            The Proven X
-          </Badge>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-extrabold text-white tracking-tight drop-shadow-sm leading-tight">
-            {t("home.title")}
-          </h1>
-          <p className="text-lg md:text-xl text-white/95 max-w-2xl mx-auto font-medium drop-shadow-sm">
-            {t("home.subtitle")}
-          </p>
-
-          <div className="max-w-2xl mx-auto mt-6 relative">
-            <form onSubmit={handleSearch} className="w-full group">
-              <div className="relative w-full flex items-center">
-                <Search className="absolute left-5 rtl:left-auto rtl:right-5 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
-                <Input
-                  name="q"
-                  type="search"
-                  placeholder={t("search.placeholder")}
-                  className="w-full pl-12 pr-6 rtl:pl-6 rtl:pr-12 h-14 bg-background/95 backdrop-blur-md border-2 border-white/20 focus-visible:bg-white focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 transition-all rounded-full shadow-lg text-lg"
-                />
-              </div>
-            </form>
+          <div className="hero-title-stage">
+            <HeroTitle />
           </div>
         </div>
       </section>
 
+      <Manifesto />
+
       <ProvenVideo />
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="container mx-auto max-w-6xl px-4 flex flex-col lg:flex-row gap-8">
         <TopQuestions
           category={feed.category}
           categoryLabel={
