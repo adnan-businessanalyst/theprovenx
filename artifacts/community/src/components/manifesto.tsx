@@ -21,16 +21,20 @@ export function Manifesto() {
     <section
       ref={sectionRef}
       className="manifesto-section w-full mb-8 sm:mb-10 overflow-x-clip"
-      aria-label="Every answer here is a first-hand account. Nothing is marked Proven until other people who did the same thing confirm it matches."
+      aria-label="Every answer here is a first-hand eXperience. Nothing is marked Proven until other people who did the same thing confirm it matches."
     >
       <div className="absolute inset-0 bg-white dark:bg-[#101F38] -z-10" />
       <div className={`manifesto-stack ${inView ? "is-in" : ""}`}>
         <span className="manifesto-line manifesto-line-sm">Every answer here</span>
         <span className="manifesto-line manifesto-line-lg">
-          is a first-hand account
+          is a first-hand{" "}
+          <span className="manifesto-experience">
+            e<span className="manifesto-experience-x">X</span>perience
+          </span>
         </span>
         <span className="manifesto-line manifesto-line-lg">
-          Nothing is marked Proven
+          Nothing is marked{" "}
+          <span className="manifesto-proven">Proven</span>
         </span>
         <span className="manifesto-line manifesto-line-md">
           until others confirm it matches
