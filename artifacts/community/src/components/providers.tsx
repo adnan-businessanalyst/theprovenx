@@ -19,7 +19,7 @@ function RTLProvider({ children }: { children: ReactNode }) {
       (typeof window !== "undefined" ? window.localStorage.i18nextLng : null) ||
       "en";
     document.documentElement.dir = isRTL(lang) ? "rtl" : "ltr";
-    document.documentElement.lang = lang;
+    document.documentElement.lang = lang.split("-")[0] || "en";
   }, [i18n.language]);
 
   return children;

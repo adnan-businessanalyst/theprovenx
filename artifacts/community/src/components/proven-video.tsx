@@ -77,7 +77,7 @@ export function ProvenVideo() {
     };
   }, []);
 
-  // On enter: check → circle → full. On leave: reset so it replays next time.
+  // On enter: section slides in, then check → circle → full. On leave: reset.
   useEffect(() => {
     if (!inView) {
       setPhase("check");
@@ -85,8 +85,8 @@ export function ProvenVideo() {
     }
 
     setPhase("check");
-    const toCircle = window.setTimeout(() => setPhase("circle"), 80);
-    const toFull = window.setTimeout(() => setPhase("full"), 620);
+    const toCircle = window.setTimeout(() => setPhase("circle"), 420);
+    const toFull = window.setTimeout(() => setPhase("full"), 960);
     return () => {
       window.clearTimeout(toCircle);
       window.clearTimeout(toFull);
@@ -141,6 +141,7 @@ export function ProvenVideo() {
       aria-label={t("how_it_works.headline")}
     >
       <div className="proven-video-sticky w-full max-w-[100vw] overflow-x-clip bg-[#FAF8F4] dark:bg-[#101F38] flex flex-col proven-video-pad">
+        <div className={`proven-video-enter ${inView ? "is-in" : ""}`}>
         <div className="proven-video-copy relative z-20 mx-auto mb-2 sm:mb-4 w-full max-w-[40rem] sm:max-w-[48rem] text-center shrink-0 px-1">
           <p className="proven-video-eyebrow">{t("how_it_works.eyebrow")}</p>
           <h2 className="proven-video-headline">{t("how_it_works.headline")}</h2>
@@ -230,6 +231,7 @@ export function ProvenVideo() {
               </button>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </section>

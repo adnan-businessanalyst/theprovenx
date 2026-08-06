@@ -2575,7 +2575,7 @@ if (typeof window !== "undefined") {
 
 i18nInstance.init({
   resources,
-  lng: typeof window === "undefined" ? "en" : undefined,
+  lng: "en",
   fallbackLng: "en",
   supportedLngs: [
     "en",
@@ -2596,7 +2596,8 @@ i18nInstance.init({
     escapeValue: false,
   },
   detection: {
-    order: ["localStorage", "navigator"],
+    // Prefer a saved choice; otherwise stay on English.
+    order: ["localStorage"],
     caches: ["localStorage"],
   },
 });
