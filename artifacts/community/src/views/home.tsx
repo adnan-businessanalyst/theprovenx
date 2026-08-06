@@ -27,7 +27,7 @@ import {
   Award,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { HowItWorks } from "@/components/how-it-works";
+import { ProvenVideo } from "@/components/proven-video";
 import {
   TopQuestions,
   type TopQuestionsSort,
@@ -248,7 +248,7 @@ export default function Home() {
         </div>
       </section>
 
-      <HowItWorks />
+      <ProvenVideo />
 
       <div className="flex flex-col lg:flex-row gap-8">
         <TopQuestions
