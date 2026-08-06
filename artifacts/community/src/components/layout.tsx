@@ -111,7 +111,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <PageScrollNavContext.Provider value={pageScrollCtx}>
     <div
       className={cn(
-        "min-h-[100dvh] flex flex-col font-sans",
+        "min-h-[100dvh] flex flex-col font-sans overflow-x-clip",
         isWhoWeArePage ? "bg-transparent" : "bg-muted/20",
       )}
     >

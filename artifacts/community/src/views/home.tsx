@@ -200,7 +200,7 @@ export default function Home() {
     <>
       <section
         ref={heroRef}
-        className={`hero-section w-[100vw] relative left-1/2 rtl:left-auto rtl:right-1/2 -translate-x-1/2 rtl:translate-x-1/2 -mt-16 mb-8 sm:mb-10 shadow-sm isolate flex items-center justify-center pt-20 sm:pt-16 px-3 sm:px-4 overflow-x-clip ${
+        className={`hero-section w-full -mt-16 mb-8 sm:mb-10 shadow-sm isolate flex items-center justify-center pt-20 sm:pt-16 px-3 sm:px-4 overflow-x-clip ${
           heroVisible !== false ? "is-in" : ""
         }`}
       >

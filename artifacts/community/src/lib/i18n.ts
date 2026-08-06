@@ -6,9 +6,9 @@ const resources = {
   "en": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "How it works",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "How an answer gets proven",
-          "muted": "Four steps, and only the last one hands out the Proven mark.",
+          "muted": "4 steps to a Proven eXperience",
           "step1": {
             "title": "A question is asked",
             "copy": "Someone describes a real situation they are facing."
@@ -203,9 +203,9 @@ const resources = {
   "ar": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "كيف تعمل",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "كيف يتم إثبات الإجابة",
-          "muted": "أربع خطوات، والأخيرة فقط تمنح علامة الإثبات.",
+          "muted": "٤ خطوات نحو تجربة Proven eXperience",
           "step1": {
             "title": "يتم طرح سؤال",
             "copy": "يصف شخص ما موقفًا حقيقيًا يواجهه."
@@ -400,9 +400,9 @@ const resources = {
   "tl": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "Paano ito gumagana",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "Paano napapatunayan ang isang sagot",
-          "muted": "Apat na hakbang, at tanging ang huli ang nagbibigay ng markang Patunayan.",
+          "muted": "4 steps to a Proven eXperience",
           "step1": {
             "title": "May itatanong",
             "copy": "Inilalarawan ng isang tao ang totoong sitwasyon na kanilang hinaharap."
@@ -597,9 +597,9 @@ const resources = {
   "hi": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "यह कैसे काम करता है",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "कोई उत्तर कैसे प्रमाणित होता है",
-          "muted": "चार कदम, और केवल अंतिम वाला 'प्रमाणित' का चिह्न देता है।",
+          "muted": "4 steps to a Proven eXperience",
           "step1": {
             "title": "एक प्रश्न पूछा जाता है",
             "copy": "कोई व्यक्ति अपने सामने आने वाली एक वास्तविक स्थिति का वर्णन करता है।"
@@ -794,9 +794,9 @@ const resources = {
   "zh": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "运作方式",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "一个答案是如何被验证的",
-          "muted": "四个步骤，只有最后一步才会赋予“已验证”标志。",
+          "muted": "4 steps to a Proven eXperience",
           "step1": {
             "title": "提出问题",
             "copy": "有人描述他们正面临的真实情况。"
@@ -991,9 +991,9 @@ const resources = {
   "fr": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "Comment ça marche",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "Comment une réponse est prouvée",
-          "muted": "Quatre étapes, et seule la dernière attribue la marque Prouvé.",
+          "muted": "4 steps to a Proven eXperience",
           "step1": {
             "title": "Une question est posée",
             "copy": "Quelqu'un décrit une situation réelle à laquelle il est confronté."
@@ -1188,9 +1188,9 @@ const resources = {
   "es": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "Cómo funciona",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "Cómo se demuestra una respuesta",
-          "muted": "Cuatro pasos, y solo el último otorga la marca de Demostrado.",
+          "muted": "4 steps to a Proven eXperience",
           "step1": {
             "title": "Se hace una pregunta",
             "copy": "Alguien describe una situación real a la que se enfrenta."
@@ -1385,9 +1385,9 @@ const resources = {
   "ru": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "Как это работает",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "Как ответ становится проверенным",
-          "muted": "Четыре шага, и только последний дает знак Проверено.",
+          "muted": "4 steps to a Proven eXperience",
           "step1": {
             "title": "Задается вопрос",
             "copy": "Кто-то описывает реальную ситуацию, с которой столкнулся."
@@ -1582,9 +1582,9 @@ const resources = {
   "uk": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "Як це працює",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "Як відповідь стає перевіреною",
-          "muted": "Чотири кроки, і лише останній дає знак Перевірено.",
+          "muted": "4 steps to a Proven eXperience",
           "step1": {
             "title": "Ставиться питання",
             "copy": "Хтось описує реальну ситуацію, з якою зіткнувся."
@@ -1779,9 +1779,9 @@ const resources = {
   "fa": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "نحوه کار",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "چگونه یک پاسخ اثبات می‌شود",
-          "muted": "چهار مرحله، و فقط مرحله آخر نشان اثبات‌شده را می‌دهد.",
+          "muted": "4 steps to a Proven eXperience",
           "step1": {
             "title": "یک سوال پرسیده می‌شود",
             "copy": "شخصی یک موقعیت واقعی را که با آن روبرو شده توصیف می‌کند."
@@ -1976,9 +1976,9 @@ const resources = {
   "ur": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "یہ کیسے کام کرتا ہے",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "جواب کیسے ثابت ہوتا ہے",
-          "muted": "چار مراحل، اور صرف آخری مرحلہ ثابت شدہ کا نشان دیتا ہے۔",
+          "muted": "4 steps to a Proven eXperience",
           "step1": {
             "title": "ایک سوال پوچھا جاتا ہے",
             "copy": "کوئی شخص ایسی حقیقی صورتحال بیان کرتا ہے جس کا وہ سامنا کر رہا ہے۔"
@@ -2173,9 +2173,9 @@ const resources = {
   "bn": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "এটি কীভাবে কাজ করে",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "একটি উত্তর কীভাবে প্রমাণিত হয়",
-          "muted": "চারটি ধাপ, এবং শুধুমাত্র শেষটি 'প্রমাণিত' চিহ্ন প্রদান করে।",
+          "muted": "4 steps to a Proven eXperience",
           "step1": {
             "title": "একটি প্রশ্ন জিজ্ঞাসা করা হয়",
             "copy": "কেউ তাদের সম্মুখীন হওয়া একটি বাস্তব পরিস্থিতি বর্ণনা করে।"
@@ -2370,9 +2370,9 @@ const resources = {
   "tr": {
     "translation": {
         "how_it_works": {
-          "eyebrow": "Nasıl çalışır",
+          "eyebrow": "HOW The ProvenX WORKS",
           "headline": "Bir cevap nasıl kanıtlanır",
-          "muted": "Dört adım, ve sadece sonuncusu Kanıtlanmış işaretini verir.",
+          "muted": "4 steps to a Proven eXperience",
           "step1": {
             "title": "Bir soru sorulur",
             "copy": "Birisi karşılaştığı gerçek bir durumu anlatır."

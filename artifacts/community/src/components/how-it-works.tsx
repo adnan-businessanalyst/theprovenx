@@ -4,7 +4,7 @@ export function HowItWorks() {
   const { t } = useTranslation();
 
   return (
-    <section className="w-[100vw] relative left-1/2 rtl:left-auto rtl:right-1/2 -translate-x-1/2 rtl:translate-x-1/2 bg-[#FAF8F4] dark:bg-muted/30 py-12 mb-10">
+    <section className="w-full bg-[#FAF8F4] dark:bg-muted/30 py-12 mb-10">
       <div className="max-w-[1180px] mx-auto px-[28px]">
         {/* Inner Card */}
         <div className="bg-[#FFFFFF] dark:bg-card border border-[#E4E1DA] dark:border-border rounded-[18px] p-[32px] shadow-sm">

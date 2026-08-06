@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pause, Play, Volume2, VolumeX } from "lucide-react";
 
@@ -9,6 +9,118 @@ const CHECK_MASK = `url("data:image/svg+xml,${encodeURIComponent(
 )}")`;
 
 type Phase = "check" | "circle" | "full";
+
+type TypeTone =
+  | "plain"
+  | "eyebrow-plain"
+  | "brand"
+  | "experience"
+  | "x"
+  | "headline";
+
+type TypeChar = {
+  ch: string;
+  tone: TypeTone;
+  /** Letter-by-letter order; X letters are assigned after all others. */
+  revealIndex: number;
+};
+
+const LETTER_STAGGER_MS = 38;
+const X_PAUSE_MS = 220;
+
+const EYEBROW_PARTS: { text: string; tone: TypeTone }[] = [
+  { text: "HOW ", tone: "eyebrow-plain" },
+  { text: "The Proven", tone: "brand" },
+  { text: "X", tone: "x" },
+  { text: " WORKS", tone: "eyebrow-plain" },
+];
+
+const MUTED_PARTS: { text: string; tone: TypeTone }[] = [
+  { text: "4 steps for ", tone: "plain" },
+  { text: "The Proven", tone: "brand" },
+  { text: " ", tone: "plain" },
+  { text: "e", tone: "experience" },
+  { text: "X", tone: "x" },
+  { text: "perience", tone: "experience" },
+];
+
+const EYEBROW_FULL = "HOW The ProvenX WORKS";
+const MUTED_FULL = "4 steps for The Proven eXperience";
+
+function charsFromParts(parts: { text: string; tone: TypeTone }[]): Omit<TypeChar, "revealIndex">[] {
+  return parts.flatMap(({ text, tone }) => [...text].map((ch) => ({ ch, tone })));
+}
+
+/** Non-X letters first (across lines), then every X at the end. */
+function assignRevealOrder(lines: Omit<TypeChar, "revealIndex">[][]): TypeChar[][] {
+  let next = 0;
+  const ordered = lines.map((line) =>
+    line.map((c) =>
+      c.tone === "x" ? { ...c, revealIndex: -1 } : { ...c, revealIndex: next++ },
+    ),
+  );
+  for (const line of ordered) {
+    for (let i = 0; i < line.length; i++) {
+      if (line[i].tone === "x") {
+        line[i] = { ...line[i], revealIndex: next++ };
+      }
+    }
+  }
+  return ordered;
+}
+
+function toneClass(tone: TypeTone): string {
+  switch (tone) {
+    case "eyebrow-plain":
+      return "proven-video-eyebrow-plain";
+    case "brand":
+      return "proven-type-brand";
+    case "experience":
+      return "proven-type-experience";
+    case "x":
+      return "proven-type-x";
+    case "headline":
+      return "proven-type-headline";
+    default:
+      return "";
+  }
+}
+
+function TypedLine({
+  as: Tag,
+  className,
+  active,
+  chars,
+  label,
+}: {
+  as: "p" | "h2";
+  className: string;
+  active: boolean;
+  chars: TypeChar[];
+  label: string;
+}) {
+  return (
+    <Tag
+      className={`${className} ${active ? "is-typing" : ""}`}
+      aria-label={label}
+    >
+      {chars.map((c, i) => {
+        const delayMs =
+          c.revealIndex * LETTER_STAGGER_MS + (c.tone === "x" ? X_PAUSE_MS : 0);
+        return (
+          <span
+            key={`${c.ch}-${i}`}
+            className={`proven-type-char ${toneClass(c.tone)} ${c.tone === "x" ? "is-x" : ""}`}
+            style={{ animationDelay: `${delayMs}ms` }}
+            aria-hidden="true"
+          >
+            {c.ch === " " ? "\u00a0" : c.ch}
+          </span>
+        );
+      })}
+    </Tag>
+  );
+}
 
 function sizesForStage(width: number, height: number) {
   const side = Math.min(width, height) || 320;
@@ -34,6 +146,17 @@ export function ProvenVideo() {
   const [circleMid, setCircleMid] = useState(64);
   const [playing, setPlaying] = useState(true);
   const [muted, setMuted] = useState(true);
+
+  const headlineLabel = t("how_it_works.headline");
+  const [eyebrowChars, headlineChars, mutedChars] = useMemo(
+    () =>
+      assignRevealOrder([
+        charsFromParts(EYEBROW_PARTS),
+        charsFromParts([{ text: headlineLabel, tone: "headline" }]),
+        charsFromParts(MUTED_PARTS),
+      ]),
+    [headlineLabel],
+  );
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -137,15 +260,33 @@ export function ProvenVideo() {
   return (
     <section
       ref={sectionRef}
-      className="proven-video-track relative w-full max-w-[100vw] overflow-x-clip"
+      className="proven-video-track relative w-full overflow-x-clip"
       aria-label={t("how_it_works.headline")}
     >
-      <div className="proven-video-sticky w-full max-w-[100vw] overflow-x-clip bg-[#FAF8F4] dark:bg-[#101F38] flex flex-col proven-video-pad">
+      <div className="proven-video-sticky w-full overflow-x-clip bg-[#FAF8F4] dark:bg-[#101F38] flex flex-col proven-video-pad">
         <div className={`proven-video-enter ${inView ? "is-in" : ""}`}>
         <div className="proven-video-copy relative z-20 mx-auto mb-2 sm:mb-4 w-full max-w-[40rem] sm:max-w-[48rem] text-center shrink-0 px-1">
-          <p className="proven-video-eyebrow">{t("how_it_works.eyebrow")}</p>
-          <h2 className="proven-video-headline">{t("how_it_works.headline")}</h2>
-          <p className="proven-video-muted">{t("how_it_works.muted")}</p>
+          <TypedLine
+            as="p"
+            className="proven-video-eyebrow"
+            active={inView}
+            chars={eyebrowChars}
+            label={EYEBROW_FULL}
+          />
+          <TypedLine
+            as="h2"
+            className="proven-video-headline"
+            active={inView}
+            chars={headlineChars}
+            label={headlineLabel}
+          />
+          <TypedLine
+            as="p"
+            className="proven-video-muted"
+            active={inView}
+            chars={mutedChars}
+            label={MUTED_FULL}
+          />
         </div>
 
         <div className="proven-video-stage-wrap relative z-10 flex min-h-0 items-center justify-center w-full">

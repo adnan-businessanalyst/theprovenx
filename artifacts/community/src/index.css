@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Big+Shoulders+Display:wght@700;800;900&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Big+Shoulders+Display:wght@700;800;900&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -202,8 +202,12 @@
     @apply border-border;
   }
 
+  html {
+    overflow-x: clip;
+  }
+
   body {
-    @apply font-sans antialiased bg-background text-foreground overflow-x-hidden;
+    @apply font-sans antialiased bg-background text-foreground overflow-x-clip;
     /* Default direction handled by dir attribute but setting logical spacing via rtl variant */
   }
 
@@ -284,8 +288,8 @@
   text-transform: uppercase;
   color: #fff6eb;
   text-shadow: 0 2px 24px rgba(16, 31, 56, 0.35);
-  width: min(100%, 96vw);
-  max-width: 96vw;
+  width: 100%;
+  max-width: 100%;
   margin-inline: auto;
   overflow: visible;
   box-sizing: border-box;
@@ -594,7 +598,7 @@
 .manifesto-section {
   display: flex;
   align-items: flex-end;
-  justify-content: flex-start;
+  justify-content: center;
   min-height: min(62svh, 520px);
   padding:
     clamp(1.25rem, 4vh, 2.5rem)
@@ -628,7 +632,7 @@
   letter-spacing: 0.01em;
   text-transform: uppercase;
   color: #000;
-  width: 100%;
+  width: fit-content;
   max-width: min(52rem, 100%);
   opacity: 0;
   transform: translateX(-48px);
@@ -699,14 +703,14 @@
 }
 
 [dir="rtl"] .manifesto-section {
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 [dir="rtl"] .manifesto-stack {
-  align-items: flex-end;
-  text-align: right;
+  align-items: flex-start;
+  text-align: left;
   transform: translateX(80px);
-  transform-origin: right bottom;
+  transform-origin: left bottom;
 }
 
 [dir="rtl"] .manifesto-stack.is-in {
@@ -859,32 +863,162 @@
   margin: 0 0 0.4rem;
   font-weight: 700;
   font-size: clamp(0.65rem, 2.2vw, 0.75rem);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #e4640d;
+  letter-spacing: 0.08em;
+  color: #000;
   line-height: 1.25;
+}
+
+.proven-video-eyebrow-plain {
+  color: #000;
+}
+
+.proven-video-eyebrow-brand {
+  color: #1d4ed8;
+}
+
+.proven-video-eyebrow-x {
+  color: #e4640d;
 }
 
 .proven-video-headline {
   margin: 0 0 0.5rem;
+  font-family: var(--app-font-serif);
   font-weight: 800;
-  font-size: clamp(1.25rem, 4.5vw, 2.15rem);
-  letter-spacing: -0.02em;
+  font-size: clamp(1.75rem, 5.8vw, 3.1rem);
+  letter-spacing: -0.035em;
   color: #101f38;
-  line-height: 1.2;
+  line-height: 1.02;
   text-wrap: balance;
 }
 
 .proven-video-muted {
   display: block;
   margin: 0 auto;
-  max-width: min(40rem, 100%);
-  font-weight: 500;
-  font-size: clamp(0.85rem, 2.6vw, 1.05rem);
-  color: #5a6b85;
-  line-height: 1.45;
+  max-width: min(42rem, 100%);
+  font-weight: 700;
+  font-size: clamp(1.05rem, 3.2vw, 1.35rem);
+  color: #000;
+  line-height: 1.35;
   text-wrap: pretty;
   overflow: visible;
+}
+
+.proven-type-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateX(0.75em);
+  will-change: transform, opacity;
+}
+
+.is-typing .proven-type-char:not(.is-x) {
+  animation: proven-type-letter-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.is-typing .proven-type-char.is-x {
+  animation: proven-type-x-fly 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+:not(.is-typing) > .proven-type-char {
+  animation: none;
+  opacity: 0;
+  transform: translateX(0.75em);
+}
+
+@keyframes proven-type-letter-in {
+  from {
+    opacity: 0;
+    transform: translateX(0.75em);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes proven-type-x-fly {
+  0% {
+    opacity: 0;
+    transform: translateX(2.75rem) scale(0.55) rotate(-18deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(-0.08em) scale(1.12) rotate(4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1) rotate(0deg);
+  }
+}
+
+[dir="rtl"] .proven-type-char {
+  transform: translateX(-0.75em);
+}
+
+[dir="rtl"] :not(.is-typing) > .proven-type-char {
+  transform: translateX(-0.75em);
+}
+
+[dir="rtl"] .is-typing .proven-type-char:not(.is-x) {
+  animation-name: proven-type-letter-in-rtl;
+}
+
+[dir="rtl"] .is-typing .proven-type-char.is-x {
+  animation-name: proven-type-x-fly-rtl;
+}
+
+@keyframes proven-type-letter-in-rtl {
+  from {
+    opacity: 0;
+    transform: translateX(-0.75em);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes proven-type-x-fly-rtl {
+  0% {
+    opacity: 0;
+    transform: translateX(-2.75rem) scale(0.55) rotate(18deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(0.08em) scale(1.12) rotate(-4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1) rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proven-type-char,
+  .is-typing .proven-type-char,
+  :not(.is-typing) > .proven-type-char {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+.proven-type-brand,
+.proven-video-eyebrow-brand {
+  color: #1d4ed8;
+}
+
+.proven-type-experience {
+  color: #e6b800;
+}
+
+.proven-type-x,
+.proven-video-eyebrow-x {
+  color: #e4640d;
+  font-weight: 800;
+}
+
+.proven-type-headline {
+  color: inherit;
 }
 
 .proven-video-stage-wrap {
@@ -926,7 +1060,16 @@
   }
 }
 
-.dark .proven-video-eyebrow {
+.dark .proven-video-eyebrow,
+.dark .proven-video-eyebrow-plain {
+  color: #fff6eb;
+}
+
+.dark .proven-video-eyebrow-brand {
+  color: hsl(var(--secondary));
+}
+
+.dark .proven-video-eyebrow-x {
   color: hsl(var(--primary));
 }
 
@@ -935,7 +1078,21 @@
 }
 
 .dark .proven-video-muted {
-  color: rgba(255, 246, 235, 0.72);
+  color: #fff6eb;
+}
+
+.dark .proven-type-brand,
+.dark .proven-video-eyebrow-brand {
+  color: hsl(var(--secondary));
+}
+
+.dark .proven-type-experience {
+  color: hsl(var(--accent));
+}
+
+.dark .proven-type-x,
+.dark .proven-video-eyebrow-x {
+  color: hsl(var(--primary));
 }
 
 .proven-video-circle {
