@@ -1,7 +1,7 @@
 export function HeroTitle() {
   return (
     <h1
-      className="hero-title mx-auto w-full max-w-[52rem] select-none"
+      className="hero-title mx-auto select-none"
       aria-label="Answers people actually lived through"
     >
       <span className="hero-title-row">

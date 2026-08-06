@@ -117,7 +117,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     >
       <div
         className={cn(
-          "sticky top-4 z-50 w-full px-4 transition-all duration-300",
+          "sticky top-3 sm:top-4 z-50 w-full px-2 sm:px-4 transition-all duration-300",
           usesScrollSwapNav && pageScrolled &&
             "opacity-0 -translate-y-4 pointer-events-none h-0 overflow-hidden !px-0 m-0",
         )}
@@ -131,13 +131,13 @@ export default function Layout({ children }: { children: ReactNode }) {
               : "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-md",
           )}
         >
-          <div className="px-6 flex h-16 items-center gap-4">
+          <div className="px-3 sm:px-5 md:px-6 flex h-14 sm:h-16 items-center gap-2 sm:gap-4">
             {/* Logo */}
-            <Link href="/" className="flex items-center mr-2 hover-elevate rounded-full px-1 py-0.5 transition-all shrink-0">
+            <Link href="/" className="flex items-center mr-1 sm:mr-2 hover-elevate rounded-full px-1 py-0.5 transition-all shrink-0">
               <img
                 src="/logo.png"
                 alt="The Proven X"
-                className="h-10 w-auto max-w-[min(220px,42vw)] object-contain"
+                className="h-8 sm:h-10 w-auto max-w-[min(160px,38vw)] sm:max-w-[min(220px,42vw)] object-contain"
               />
             </Link>
 
@@ -264,14 +264,14 @@ export default function Layout({ children }: { children: ReactNode }) {
       {isWhoWeArePage || isHome ? (
         <div className="flex-1">{children}</div>
       ) : (
-        <main className="flex-1 container mx-auto max-w-6xl px-4 py-8">
+        <main className="flex-1 container mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-8">
           {children}
         </main>
       )}
 
       {!isWhoWeArePage ? (
         <footer className="border-t bg-card mt-auto">
-          <div className="container mx-auto max-w-6xl px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+          <div className="container mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground text-center md:text-start">
             <div className="flex items-center gap-2">
               <img
                 src="/logo.png"

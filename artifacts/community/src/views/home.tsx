@@ -200,7 +200,7 @@ export default function Home() {
     <>
       <section
         ref={heroRef}
-        className={`hero-section w-[100vw] relative left-1/2 rtl:left-auto rtl:right-1/2 -translate-x-1/2 rtl:translate-x-1/2 -mt-16 mb-10 shadow-sm isolate flex items-center justify-center h-[100dvh] min-h-[100dvh] pt-16 px-4 overflow-x-hidden ${
+        className={`hero-section w-[100vw] relative left-1/2 rtl:left-auto rtl:right-1/2 -translate-x-1/2 rtl:translate-x-1/2 -mt-16 mb-8 sm:mb-10 shadow-sm isolate flex items-center justify-center pt-20 sm:pt-16 px-3 sm:px-4 overflow-x-clip ${
           heroVisible !== false ? "is-in" : ""
         }`}
       >
@@ -208,15 +208,17 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/35 via-[#101F38] to-secondary/40 -z-10" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsla(45,95%,50%,0.18),_transparent_55%)] -z-10" />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto text-center space-y-8">
-          <div className="hero-actions flex flex-row items-stretch justify-center gap-3 w-full max-w-md mx-auto">
+        <div className="relative z-10 w-full max-w-7xl mx-auto text-center flex flex-col items-center gap-4 sm:gap-6 md:gap-8">
+          <div className="hero-actions flex flex-row items-stretch justify-center gap-2 sm:gap-3 w-full max-w-[min(100%,20rem)] sm:max-w-sm md:max-w-md mx-auto">
             <div className="hero-action-ask flex-1 min-w-0">
               <Button
                 asChild
                 variant="outline"
-                className="hero-action-ask-btn w-full rounded-full px-6 h-[6.25rem] bg-transparent hover:bg-primary/10 border-2 border-primary text-primary hover:text-primary font-bold text-base sm:text-lg shadow-none"
+                className="hero-action-ask-btn w-full rounded-full px-2 sm:px-5 h-12 sm:h-16 md:h-20 lg:h-[6.25rem] bg-transparent hover:bg-primary/10 border-2 border-primary text-primary hover:text-primary font-bold text-[0.7rem] sm:text-sm md:text-base lg:text-lg shadow-none leading-tight"
               >
-                <Link href="/ask">{t("nav.ask")}</Link>
+                <Link href="/ask" className="whitespace-normal sm:whitespace-nowrap text-center">
+                  {t("nav.ask")}
+                </Link>
               </Button>
             </div>
             <div className="hero-action-search flex-1 min-w-0">
@@ -224,14 +226,14 @@ export default function Home() {
                 type="button"
                 variant="outline"
                 onClick={() => setLocation("/search")}
-                className="hero-action-search-input w-full h-[6.25rem] rounded-full bg-transparent hover:bg-secondary/10 border-2 border-secondary text-secondary hover:text-secondary shadow-none"
+                className="hero-action-search-input w-full h-12 sm:h-16 md:h-20 lg:h-[6.25rem] rounded-full bg-transparent hover:bg-secondary/10 border-2 border-secondary text-secondary hover:text-secondary shadow-none"
                 aria-label={t("nav.search")}
               >
-                <Search className="h-[5.25rem] w-[5.25rem]" strokeWidth={1.75} />
+                <Search className="size-7 sm:size-10 md:size-12 lg:size-[5.25rem]" strokeWidth={1.75} />
               </Button>
             </div>
           </div>
-          <div className="hero-title-stage">
+          <div className="hero-title-stage w-full max-w-full overflow-hidden px-0.5">
             <HeroTitle />
           </div>
         </div>
@@ -241,7 +243,7 @@ export default function Home() {
 
       <ProvenVideo />
 
-      <div className="container mx-auto max-w-6xl px-4 flex flex-col lg:flex-row gap-8">
+      <div className="container mx-auto max-w-6xl px-3 sm:px-4 pb-8 flex flex-col lg:flex-row gap-6 lg:gap-8">
         <TopQuestions
           category={feed.category}
           categoryLabel={
@@ -256,11 +258,11 @@ export default function Home() {
           onClearFilters={handleClearFilters}
         />
 
-        <div className="lg:w-80 shrink-0 space-y-6">
+        <div className="lg:w-80 shrink-0 space-y-5 sm:space-y-6">
           {topVerifiers && topVerifiers.length > 0 && (
-            <div className="p-6 rounded-3xl border bg-card shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="font-serif font-semibold text-xl mb-4 flex items-center gap-2">
-                <Award className="h-5 w-5 text-accent" /> {t("home.topVerifiers")}
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl border bg-card shadow-sm hover:shadow-md transition-shadow">
+              <h3 className="font-serif font-semibold text-lg sm:text-xl mb-4 flex items-center gap-2">
+                <Award className="h-5 w-5 text-accent shrink-0" /> {t("home.topVerifiers")}
               </h3>
               <div className="space-y-4">
                 {topVerifiers.map((tv, idx) => (
@@ -299,9 +301,9 @@ export default function Home() {
           )}
 
           {sortedCategories.length > 0 && (
-            <div className="p-6 rounded-3xl border bg-card shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="font-serif font-semibold text-xl mb-4 flex items-center gap-2">
-                <Grid2X2 className="h-5 w-5 text-primary" /> {t("home.categories")}
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl border bg-card shadow-sm hover:shadow-md transition-shadow">
+              <h3 className="font-serif font-semibold text-lg sm:text-xl mb-4 flex items-center gap-2">
+                <Grid2X2 className="h-5 w-5 text-primary shrink-0" /> {t("home.categories")}
               </h3>
               <div className="space-y-2">
                 <button
@@ -359,11 +361,11 @@ export default function Home() {
           )}
 
           {stats && (
-            <div className="p-6 rounded-3xl border bg-card shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl border bg-card shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
               <div className="absolute top-0 right-0 rtl:right-auto rtl:left-0 p-4 opacity-5 group-hover:opacity-10 group-hover:scale-110 transition-all duration-500">
                 <TrendingUp className="h-32 w-32" />
               </div>
-              <h3 className="font-serif font-semibold text-xl mb-6">
+              <h3 className="font-serif font-semibold text-lg sm:text-xl mb-5 sm:mb-6">
                 {t("home.community_pulse")}
               </h3>
               <div className="space-y-5">
@@ -411,9 +413,9 @@ export default function Home() {
           )}
 
           {popularTags && popularTags.length > 0 && (
-            <div className="p-6 rounded-3xl border bg-card shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="font-serif font-semibold text-xl mb-4 flex items-center gap-2">
-                <Layers className="h-5 w-5 text-accent" /> {t("home.popular_tags")}
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl border bg-card shadow-sm hover:shadow-md transition-shadow">
+              <h3 className="font-serif font-semibold text-lg sm:text-xl mb-4 flex items-center gap-2">
+                <Layers className="h-5 w-5 text-accent shrink-0" /> {t("home.popular_tags")}
               </h3>
               <div className="flex flex-wrap gap-2">
                 {popularTags.map((popularTag) => {

@@ -126,7 +126,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   if (mode === "sign-up" && step === "bio") {
     return (
-      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-5 sm:p-8 shadow-xl">
         <div className="mb-6 text-center">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -184,7 +184,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   }
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-xl">
+    <div className="w-full max-w-md rounded-2xl border border-border bg-card p-5 sm:p-8 shadow-xl">
       <div className="mb-6 text-center">
         <Link href="/" className="inline-flex items-center gap-2 mb-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -12,8 +12,8 @@ export default function QuestionCard({ question }: { question: Question }) {
   const { t, i18n } = useTranslation();
 
   return (
-    <div className={`p-5 rounded-xl border bg-card text-card-foreground shadow-sm hover-elevate transition-all ${question.isFeatured ? 'border-secondary/50 bg-secondary/5' : ''}`}>
-      <div className="flex flex-col sm:flex-row gap-4">
+    <div className={`p-4 sm:p-5 rounded-xl border bg-card text-card-foreground shadow-sm hover-elevate transition-all ${question.isFeatured ? 'border-secondary/50 bg-secondary/5' : ''}`}>
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         {/* Stats Sidebar */}
         <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:w-24 shrink-0 text-sm">
           <div className="flex items-center gap-1 font-medium">

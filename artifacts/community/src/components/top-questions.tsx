@@ -77,13 +77,13 @@ export function TopQuestions({
 
   return (
     <div className="flex-1 min-w-0">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h2 className="text-3xl font-serif font-bold text-foreground flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-5 sm:mb-6">
+        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-foreground flex items-center gap-2 break-words">
           {title}
         </h2>
         <Link
           href="/ask"
-          className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-6 font-medium text-primary-foreground shadow hover-elevate transition-colors sm:hidden"
+          className="inline-flex h-10 w-full sm:w-auto items-center justify-center rounded-full bg-primary px-6 font-medium text-primary-foreground shadow hover-elevate transition-colors sm:hidden"
         >
           {t("nav.ask")}
         </Link>
@@ -94,32 +94,34 @@ export function TopQuestions({
         onValueChange={(v) => onSortChange(v as TopQuestionsSort)}
         className="mb-6"
       >
-        <TabsList className="bg-muted/50 p-1 rounded-full flex-wrap h-auto justify-start">
+        <div className="-mx-1 px-1 overflow-x-auto overscroll-x-contain scrollbar-none">
+        <TabsList className="bg-muted/50 p-1 rounded-full inline-flex w-max min-w-full sm:min-w-0 h-auto justify-start gap-0.5">
           <TabsTrigger
             value="active"
-            className="rounded-full px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
+            className="rounded-full px-3.5 sm:px-6 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
           >
             {t("home.active")}
           </TabsTrigger>
           <TabsTrigger
             value="newest"
-            className="rounded-full px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
+            className="rounded-full px-3.5 sm:px-6 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
           >
             {t("home.newest")}
           </TabsTrigger>
           <TabsTrigger
             value="votes"
-            className="rounded-full px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
+            className="rounded-full px-3.5 sm:px-6 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
           >
             {t("home.votes")}
           </TabsTrigger>
           <TabsTrigger
             value="unanswered"
-            className="rounded-full px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
+            className="rounded-full px-3.5 sm:px-6 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
           >
             {t("home.unanswered")}
           </TabsTrigger>
         </TabsList>
+        </div>
       </Tabs>
 
       <div className="space-y-4">
