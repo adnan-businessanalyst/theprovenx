@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "./site";
 const DEFAULT_OG_IMAGE = absoluteUrl("/og-default.png");
-const DEFAULT_WHATSAPP_IMAGE = absoluteUrl("/og-whatsapp.jpg");
-
 
 type BuildMetadataInput = {
   title: string;
@@ -22,10 +20,15 @@ export function buildMetadata({
   image = DEFAULT_OG_IMAGE,
 }: BuildMetadataInput): Metadata {
   const url = absoluteUrl(path);
-  const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
+  // Use absolute so the root layout `title.template` ("%s | SITE_NAME")
+  // does not append the brand a second time.
+  const fullTitle =
+    title === SITE_NAME || title.includes(`| ${SITE_NAME}`) || title.endsWith(SITE_NAME)
+      ? title
+      : `${title} | ${SITE_NAME}`;
 
   return {
-    title: fullTitle,
+    title: { absolute: fullTitle },
     description,
     alternates: { canonical: url },
     robots: noIndex

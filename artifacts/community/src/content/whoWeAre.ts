@@ -5,12 +5,12 @@ export type ProofStat = {
 
 export const whoWeAre = {
   meta: {
-    title: "Who We Are — TheProvenX",
+    title: "Who We Are | The ProvenX",
     description:
-      "TheProvenX is a Saudi-based answers community and digital solutions company. Real experience, useful answers, practical digital solutions.",
+      "The ProvenX is a Saudi-based answers community and digital solutions company. Real experience, useful answers, practical digital solutions.",
   },
   header: {
-    brand: "TheProvenX",
+    brand: "The ProvenX",
     nav: [
       { href: "#our-direction", label: "Our direction" },
       { href: "#what-makes-it-proven", label: "What makes it proven" },

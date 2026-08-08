@@ -13,19 +13,16 @@ import { Direction } from "@/components/who-we-are/Direction";
 import { ClosingCta } from "@/components/who-we-are/ClosingCta";
 import { WhoWeAreFooter } from "@/components/who-we-are/WhoWeAreFooter";
 
-export const metadata: Metadata = {
-  ...buildMetadata({
-    title: "Who We Are",
-    description: whoWeAre.meta.description,
-    path: "/who-we-are",
-  }),
-  title: whoWeAre.meta.title,
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Who We Are",
+  description: whoWeAre.meta.description,
+  path: "/who-we-are",
+});
 
 const orgJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "TheProvenX",
+  name: "The ProvenX",
   description: whoWeAre.meta.description,
   founder: {
     "@type": "Person",
