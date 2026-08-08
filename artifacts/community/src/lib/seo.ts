@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "./site";
 const DEFAULT_OG_IMAGE = absoluteUrl("/og-default.png");
+const DEFAULT_WHATSAPP_IMAGE = absoluteUrl("/og-whatsapp.jpg");
+
 
 type BuildMetadataInput = {
   title: string;
