@@ -22,6 +22,6 @@ export function getApiBaseUrl(): string {
   );
 }
 
-export const SITE_NAME = "The Proven X";
+export const SITE_NAME = "The ProvenX";
 export const SITE_DESCRIPTION =
   "A niche Q&A community for hard-to-find knowledge: policies, regulations, unwritten rules, and practical advice.";
