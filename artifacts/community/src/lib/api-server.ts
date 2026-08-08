@@ -36,6 +36,32 @@ export type UserMeta = {
   reputation?: number;
 };
 
+export type QuestionDetailMeta = {
+  question: {
+    slug: string;
+    title: string;
+    body: string;
+    score: number;
+    createdAt: string;
+    updatedAt: string;
+    author: { username: string; displayName?: string | null };
+  };
+  answers: {
+    body: string;
+    score: number;
+    isAccepted: boolean;
+    createdAt: string;
+    author: { username: string; displayName?: string | null };
+  }[];
+};
+
+export async function fetchQuestionDetail(slug: string): Promise<QuestionDetailMeta | null> {
+  return fetchApi<QuestionDetailMeta>(
+    `/api/questions/${encodeURIComponent(slug)}`,
+    { next: { revalidate: 120 } },
+  );
+}
+
 export async function fetchQuestionMeta(slug: string): Promise<QuestionMeta | null> {
   const data = await fetchApi<{ question: QuestionMeta }>(
     `/api/questions/${encodeURIComponent(slug)}`,
