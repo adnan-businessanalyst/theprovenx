@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "./site";
+const DEFAULT_OG_IMAGE = absoluteUrl("/og-default.png");
 
 type BuildMetadataInput = {
   title: string;
@@ -16,7 +17,7 @@ export function buildMetadata({
   path = "/",
   noIndex = false,
   ogType = "website",
-  image,
+  image = DEFAULT_OG_IMAGE,
 }: BuildMetadataInput): Metadata {
   const url = absoluteUrl(path);
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
@@ -34,13 +35,13 @@ export function buildMetadata({
       url,
       siteName: SITE_NAME,
       type: ogType === "profile" ? "profile" : ogType,
-      ...(image ? { images: [{ url: image }] } : {}),
+      images: [{ url: image }],
     },
     twitter: {
-      card: image ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title: fullTitle,
       description,
-      ...(image ? { images: [image] } : {}),
+      images: [image],
     },
   };
 }
